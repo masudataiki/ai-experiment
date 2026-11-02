@@ -1,0 +1,8 @@
+.venv/
+data/
+result/
+trained_model/
+*.model
+__pycache__/
+.DS_Store
+dataset/
