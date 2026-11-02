@@ -8,7 +8,7 @@ from language_model_lstm import LanguageModelLSTM
 
 dataset = sentence_data.SentenceData("dataset/data_1000.txt")
 
-model = LanguageModelLSTM(dataset.japanese_word_size())
+model = LanguageModelLSTM(dataset.english_word_size())
 
 loss_fn = torch.nn.CrossEntropyLoss()
 
@@ -19,7 +19,7 @@ for epoch in range(epoch_num):
     print("{0} / {1} epoch start.".format(epoch + 1, epoch_num))
 
     sum_loss = 0.0
-    for i, sentence in enumerate(dataset.japanese_sentences()):
+    for i, sentence in enumerate(dataset.english_sentences()):
         model.reset_state()
         optimizer.zero_grad()
         accum_loss = None
@@ -45,6 +45,6 @@ for epoch in range(epoch_num):
     print("mean loss = {0}.".format(sum_loss / dataset.sentences_size()))
 
     # 1 epoch 毎にファイルに書き出す
-    model_file = "trained_model/langage_model_lstm_" + \
+    model_file = "trained_model/langage_model_lstm_en_" + \
         str(epoch + 1) + ".model"
     torch.save(model.state_dict(), model_file)

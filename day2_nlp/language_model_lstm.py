@@ -31,3 +31,7 @@ class LanguageModelLSTM(nn.Module):
         if gpu_id is not None:
             word = word.to(self.device)
         # ここを実装する
+        hi = self.W_x_hi(word)
+        self.hr = self.W_lstm(hi,self.hr)
+        y = self.W_hr_y(self.hr[0])
+        return y

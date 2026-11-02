@@ -1,0 +1,18 @@
+入力: i have a book .
+私はその本を読むべきだった。
+
+入力: she is a teacher .
+彼女は先生ですか。
+
+入力: i like tokyo .
+私は普通六歳だ。
+
+入力: this is just what i wanted .
+これは私が先日の日曜に通り過ぎた。
+
+入力: thank you for today .
+今日はご親切にありがとうございます。
+
+入力: it is in the kitchen .
+それは名前です。
+

@@ -1,0 +1,18 @@
+入力: i have a book .
+私はその食料のうちの少しを予備に取っておくべきだ。
+
+入力: she is a teacher .
+彼女は古典の教育を受けている。
+
+入力: i like tokyo .
+私はその食料のうちの少しを予備に取っておくべきだ。
+
+入力: this is just what i wanted .
+この静かな生活にはいい加減飽きてしまった。
+
+入力: thank you for today .
+人は波のなすがままであった。
+
+入力: it is in the kitchen .
+私達はみんなだれ一人として完璧な人間はいないことは分かっている。
+

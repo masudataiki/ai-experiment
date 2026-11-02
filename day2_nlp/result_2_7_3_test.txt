@@ -1,0 +1,24 @@
+入力: i
+i have a slight fever . 
+
+入力: he
+he is a fine fix you got the cradle is very well . 
+
+入力: she
+she is a woman with a classical education . 
+
+入力: i am
+i am sure that jim made up that story . 
+
+入力: this is
+this is the main of people are still the world . 
+
+入力: the
+the thief ran away when she saw the policeman . 
+
+入力: today
+today 's tigers-giants baseball game was called off due to heavy rain . 
+
+入力: tokyo
+tokyo , i would n't pay tax at the station . 
+
