@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "今のファイル（そのフォルダで実行）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${fileDirname}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "今のファイル（引数を毎回入力）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${fileDirname}",
+      "args": "${command:pickArgs}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "day3: MNIST MLP 1エポック（CPU）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/day3_cv/train_mnist_mlp.py",
+      "cwd": "${workspaceFolder}/day3_cv",
+      "args": ["-g", "-1", "-e", "1", "-u", "100", "-o", "result/debug"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "day4: speech のスクリプト",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}/day4_speech",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
