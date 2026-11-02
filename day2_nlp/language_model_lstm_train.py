@@ -1,3 +1,4 @@
+import argparse
 import sys
 import torch
 from torch import optim
@@ -6,9 +7,25 @@ import sentence_data
 from sentence_data import EOS_ID
 from language_model_lstm import LanguageModelLSTM
 
+# 演習2.7.3: --lang で学習する言語を切り替える（ja: 配布時の動作，en: 英語）
+parser = argparse.ArgumentParser()
+parser.add_argument("--lang", choices=["ja", "en"], default="ja")
+args = parser.parse_args()
+
 dataset = sentence_data.SentenceData("dataset/data_1000.txt")
 
-model = LanguageModelLSTM(dataset.english_word_size())
+# 演習2.7.3: 言語に応じて語彙数，学習データ，保存名を切り替える
+# en は日本語モデルを上書きしないよう，保存名に _en_ を付ける
+if args.lang == "en":
+    word_size = dataset.english_word_size()
+    sentences = dataset.english_sentences()
+    model_prefix = "trained_model/langage_model_lstm_en_"
+else:
+    word_size = dataset.japanese_word_size()
+    sentences = dataset.japanese_sentences()
+    model_prefix = "trained_model/langage_model_lstm_"
+
+model = LanguageModelLSTM(word_size)
 
 loss_fn = torch.nn.CrossEntropyLoss()
 
@@ -19,7 +36,7 @@ for epoch in range(epoch_num):
     print("{0} / {1} epoch start.".format(epoch + 1, epoch_num))
 
     sum_loss = 0.0
-    for i, sentence in enumerate(dataset.english_sentences()):
+    for i, sentence in enumerate(sentences):
         model.reset_state()
         optimizer.zero_grad()
         accum_loss = None
@@ -45,6 +62,5 @@ for epoch in range(epoch_num):
     print("mean loss = {0}.".format(sum_loss / dataset.sentences_size()))
 
     # 1 epoch 毎にファイルに書き出す
-    model_file = "trained_model/langage_model_lstm_en_" + \
-        str(epoch + 1) + ".model"
+    model_file = model_prefix + str(epoch + 1) + ".model"
     torch.save(model.state_dict(), model_file)

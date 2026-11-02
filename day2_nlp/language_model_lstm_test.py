@@ -1,3 +1,4 @@
+import argparse
 import sys
 import torch
 from torch import optim
@@ -6,11 +7,28 @@ import sentence_data
 from sentence_data import EOS_ID
 from language_model_lstm import LanguageModelLSTM
 
+# 演習2.7.3: --lang でテストする言語を切り替える（ja: 配布時の動作，en: 英語）
+parser = argparse.ArgumentParser()
+parser.add_argument("--lang", choices=["ja", "en"], default="ja")
+args = parser.parse_args()
+
 dataset = sentence_data.SentenceData("dataset/data_1000.txt")
 
-model = LanguageModelLSTM(dataset.english_word_size())
+# 演習2.7.3: 言語に応じて語彙数，読み込むモデル，単語とIDの変換を切り替える
+if args.lang == "en":
+    word_size = dataset.english_word_size()
+    model_file = "trained_model/langage_model_lstm_en_10.model"
+    word_to_id = dataset.english_word_id
+    id_to_word = dataset.english_word
+else:
+    word_size = dataset.japanese_word_size()
+    model_file = "trained_model/langage_model_lstm_10.model"
+    word_to_id = dataset.japanese_word_id
+    id_to_word = dataset.japanese_word
 
-model.load_state_dict(torch.load("trained_model/langage_model_lstm_en_10.model"))
+model = LanguageModelLSTM(word_size)
+
+model.load_state_dict(torch.load(model_file))
 model.reset_state()
 model.eval()
 
@@ -22,7 +40,7 @@ for word in initial_words:
         # 単語が空だったら飛ばす
         continue
     print(word)
-    word_id = dataset.english_word_id(word)
+    word_id = word_to_id(word)
     if word_id is None:
         sys.stderr.write("Error : Unknown word " + word + "\n")
         sys.exit()
@@ -41,5 +59,5 @@ for i in range(30):
     # EOSが出力されたら終了
     if word_id == EOS_ID:
         sys.exit()
-    print(dataset.english_word(word_id))
+    print(id_to_word(word_id))
     next_y = model(word_id)

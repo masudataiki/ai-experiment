@@ -1,5 +1,11 @@
 # Day2 自然言語処理
 
+## 実行前の準備
+- `cd day2_nlp` してから実行する（データとモデルを相対パスで読み書きするため）。
+- `dataset/` と `trained_model/` は、配布フォルダから `day2_nlp/` の下の同じ位置に置く。
+- テストは対話形式で、実行後に単語や英文を入力する。
+- 乱数シードを固定していないので、学習をやり直すと loss の値は多少変わる。
+
 ## 環境
 - マシン: MacBook Air（Apple M1, メモリ 16 GB）
 - OS: macOS 15.5
@@ -18,8 +24,9 @@
 - 結果: 数値や出力（図があればパスも）
 -->
 
-## 演習2.7.1 RNN言語モデルのテスト
+## 演習2.7.1 RNN言語モデルの学習とテスト
 ```sh
+python language_model_rnn_train.py
 python language_model_rnn_test.py
 ```
 - 変更点: なし（10エポック目のモデルを使用）
@@ -35,7 +42,7 @@ python language_model_rnn_test.py
 
 ## 演習2.7.2 LSTM言語モデルの学習
 ```sh
-python language_model_lstm_train.py
+python language_model_lstm_train.py --lang ja
 ```
 - 変更点: language_model_lstm.py の forward() を実装
   - 単語を埋め込み、LSTMCell で状態を更新し、hidden state（self.hr[0]）から出力を計算
@@ -47,7 +54,7 @@ python language_model_lstm_train.py
 
 ## 演習2.7.2 LSTM言語モデルのテスト
 ```sh
-python language_model_lstm_test.py
+python language_model_lstm_test.py --lang ja
 ```
 - 変更点: なし（10エポック目のモデルを使用）
 - 結果:
@@ -62,12 +69,12 @@ python language_model_lstm_test.py
 
 ## 演習2.7.3 英語の言語モデルの学習
 ```sh
-python language_model_lstm_train.py
+python language_model_lstm_train.py --lang en
 ```
-- 変更点: language_model_lstm_train.py
-  - 11行目: 語彙数を英語に変更
-  - 22行目: 学習データを英語の文に変更
-  - 48行目: 日本語モデルを上書きしないよう、保存名に `_en_` を追加
+- 変更点: language_model_lstm_train.py（`--lang en` で次を切り替える）
+  - 語彙数: 英語の語彙数にする
+  - 学習データ: 英語の文にする
+  - 保存名: 日本語モデルを上書きしないよう、`_en_` を付ける
 - 結果: mean loss（1文あたりの損失の合計の平均）
 
 | epoch | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
@@ -76,12 +83,12 @@ python language_model_lstm_train.py
 
 ## 演習2.7.3 英語の言語モデルのテスト
 ```sh
-python language_model_lstm_test.py
+python language_model_lstm_test.py --lang en
 ```
-- 変更点: language_model_lstm_test.py
-  - 11行目: 語彙数を英語に変更
-  - 13行目: 読み込むモデルを `_en_` 付きに変更
-  - 25, 44行目: 単語とIDの変換を英語用に変更
+- 変更点: language_model_lstm_test.py（`--lang en` で次を切り替える）
+  - 語彙数: 英語の語彙数にする
+  - 読み込むモデル: `_en_` 付きのモデルにする
+  - 単語とIDの変換: 英語用にする
 - 結果: 10エポック目のモデルを使用
 
 | 入力 | 出力（入力を含む） |
@@ -123,7 +130,7 @@ python translator_model_train.py
 
 ## 演習2.7.5 英日翻訳モデルのテスト
 ```sh
-python translator_model_test.py
+python translator_model_test.py --model small
 ```
 - 変更点: なし（10エポック目のモデルを使用）
 - 結果:
@@ -142,11 +149,11 @@ python translator_model_test.py
 
 ## 演習2.7.6 translator_full.model による翻訳
 ```sh
-python translator_model_test.py
+python translator_model_test.py --model full
 ```
-- 変更点: translator_model_test.py
-  - 7行目: 語彙の作成元を `data_full.txt` に変更
-  - 12行目: 読み込むモデルを `translator_full.model` に変更
+- 変更点: translator_model_test.py（`--model full` で次を切り替える）
+  - 語彙の作成元: `data_full.txt` にする
+  - 読み込むモデル: `translator_full.model` にする
 - 結果:
 
 | 入力 | 出力 |

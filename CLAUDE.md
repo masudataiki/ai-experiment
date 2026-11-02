@@ -6,3 +6,17 @@
 - Python は必ず `.venv/bin/python` を使う（pip も `.venv/bin/python -m pip`）。
 - Mac (arm64) では CUDA が無いので、配布コードは `-g -1`（CPU）で動作確認する。
 - GPU を使う本番の学習は Google Colab で行う。
+
+# 実験書（docs/2026_人工知能演習.pdf）
+演習について聞かれたら、まず該当ページを読んでから答えること。
+| フォルダ | 章 | ページ |
+|---|---|---|
+| day2_nlp | 第2章 Natural Language Processing（理論 2.1-2.6、演習 2.7） | p.11-19 |
+| day2_rl | 第3章 Reinforcement Learning（理論 3.1-3.3、演習 3.4） | p.21-31 |
+| day3_cv | 第4章 Image Recognition（理論 4.1、演習 4.2-4.3） | p.33-47 |
+| day4_speech | 第5章 Audio and Speech Processing（理論 5.1-5.3、演習 5.4） | p.49-59 |
+
+# 説明のしかた
+- 演習のコードが実験書のどの式（例: 式(2.1)）に対応するかを、式番号つきで示す。
+- 実験書の記法（W_h, U_h, h_t など）とコードの変数名（Wxhi, Whrhr など）の対応表を示す。
+- 穴埋めは、答えのコードを先に書かない。場所・方針・ヒントを示し、私が書いたものをレビューする。

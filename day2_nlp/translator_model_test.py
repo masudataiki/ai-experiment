@@ -1,15 +1,29 @@
+import argparse
 import sys
 import torch
 
 import sentence_data
 from translator_model import TranslatorModel
 
-dataset = sentence_data.SentenceData("dataset/data_full.txt")
+# 演習2.7.6: --model で使うモデルを切り替える（small: 演習2.7.5 の自分で学習したモデル，full: translator_full.model）
+parser = argparse.ArgumentParser()
+parser.add_argument("--model", choices=["small", "full"], default="small")
+args = parser.parse_args()
+
+# 演習2.7.6: モデルは学習時と同じ語彙でしか使えないので，データとモデルを一緒に切り替える
+if args.model == "full":
+    data_file = "dataset/data_full.txt"
+    model_file = "trained_model/translator_full.model"
+else:
+    data_file = "dataset/data_1000.txt"
+    model_file = "trained_model/translator_10.model"
+
+dataset = sentence_data.SentenceData(data_file)
 
 model = TranslatorModel(dataset.english_word_size(),
                         dataset.japanese_word_size())
 
-model.load_state_dict(torch.load("trained_model/translator_full.model"))
+model.load_state_dict(torch.load(model_file))
 
 # 入力された文章を単語に分割する
 sentence = input("input an english sentence : ").split(' ')
