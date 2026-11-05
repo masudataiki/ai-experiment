@@ -14,9 +14,11 @@ class TableQAgent(abstract_agent.Agent):
         env (gym.Env): 環境（観測・行動の空間を知るために使う）
     """
 
-    def __init__(self, env):
+    def __init__(self, env, greedy_test=False):
         self.observation_num = {key: val.n for key, val in env.observation_space.spaces.items()}
         self.action_num = env.action_space.n
+        # 演習3.4.9 test 時に greedy で行動するか (False なら test 時も epsilon-greedy)
+        self.greedy_test = greedy_test
         # 前回の観測・行動
         self.last_obs = None
         self.last_action = None
@@ -34,8 +36,18 @@ class TableQAgent(abstract_agent.Agent):
         return self.select_action(obs)
 
     def act(self, obs):
-        return self.select_action(obs)
-
+        if self.greedy_test == False:
+            return self.select_action(obs)
+        else:
+            obs_key = self.observation_to_key(obs)
+            if obs_key in self.q_table:
+                max_q_action = np.argmax(self.q_table[obs_key])
+                return max_q_action
+            else:
+                # Q値がまだ定まっていないのでランダムに動く
+                action = np.random.randint(self.action_num)
+                return action
+            
     def stop_episode_and_train(self, obs, reward, done=False):
         self.train(obs, reward)
         self.stop_episode()

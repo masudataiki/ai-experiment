@@ -130,6 +130,24 @@ y=2  .   .   .   G
   - ゴール付近のQ値から先に増え、学習が進むとスタート側のQ値も増えていく（式(3.3)の更新で、γ を掛けた値が手前のマスに伝わるため）
   - ゴールに近いマスほど、ゴールへ向かう行動のQ値が大きくなる
 
+## 演習3.4.9 test 時の greedy 行動
+```sh
+python main.py --agent tableq --quiet --greedy-test
+```
+- 変更点:
+  - agents/table_q_agent.py の act(): `greedy_test` が真なら、Q値が最大の行動を選ぶ（train は ε-greedy のまま）
+    - train で訪れなかった状態では、ランダムに動く
+  - main.py に `--greedy-test` を追加（引数なしなら従来どおり test も ε-greedy）
+- 結果: 解答は [answer_sheet.md](answer_sheet.md) の「演習 3.4.9」にも記入
+
+| train | test |
+|---|---|
+| 7.34 steps | 5.0 steps |
+
+- 比較
+  - test は最短の 5 steps で、ランダムな遠回りがなくなった
+  - train は確率 ε = 0.3 でランダムに動くことと、学習の初期にQ値が定まっていないことから、step 数が多くなる
+  - 乱数シードを固定していないので、train の値は実行ごとに変わる
 
 ## 演習3.4.x DQNエージェント
 ```sh

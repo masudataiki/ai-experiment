@@ -9,9 +9,12 @@ parser.add_argument("--quiet", action="store_true", help="毎 step の迷路の�
 parser.add_argument("--agent", choices=["random", "rulebase", "tableq"], default="random", help="使う agent")
 parser.add_argument("--env", choices=["EasyMaze-v0", "EasyMazeModified-v0"], default="EasyMaze-v0", help="使う環境")
 parser.add_argument("--show-q", action="store_true", help="Q 値の表を出力する (tableq のみ)")
+parser.add_argument("--greedy-test", action="store_true", help="test 時に greedy で行動する (tableq のみ)")
 args = parser.parse_args()
 if args.show_q and args.agent != "tableq":
     parser.error("--show-q は --agent tableq のときだけ使える")
+if args.greedy_test and args.agent != "tableq":
+    parser.error("--greedy-test は --agent tableq のときだけ使える")
 
 
 # 環境と agent を用意
@@ -21,7 +24,7 @@ env = gym.make(env_id)
 if args.agent == "rulebase":
     agent = agents.RulebaseAgent(env)
 elif args.agent == "tableq":
-    agent = agents.TableQAgent(env)
+    agent = agents.TableQAgent(env, greedy_test=args.greedy_test)
 else:
     agent = agents.RandomAgent(env)
 # agent = agents.DQNAgent(env)
