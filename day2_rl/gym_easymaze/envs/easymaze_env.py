@@ -30,7 +30,7 @@ class EasyMazeEnv(gym.Env):
     # 今回は文字列を返す ansi だけをサポート
     metadata = {'render_modes': ['ansi'], 'render_fps': 4}
 
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode=None, variant='original'):
         """コンストラクタ"""
         # 描画モードは環境を作るとき (gym.make) に指定する
         self.render_mode = render_mode
@@ -42,6 +42,11 @@ class EasyMazeEnv(gym.Env):
         self.initial_maze = [[1, 1, 1, 1],
                              [1, 1, 0, 1],
                              [1, 1, 1, 1]]
+        if variant == 'modified':
+            # 演習3.4.5 ここを編集する (EasyMazeModified-v0 で使われる)
+            self.initial_maze = [[1, 1, 1, 1],
+                                 [1, 1, 0, 1],
+                                 [1, 1, 0, 1]]
         self.start_pos, self.goal_pos = np.array(
             (0, 0)), np.array((2, 3))  # スタートとゴール (y, x)
 

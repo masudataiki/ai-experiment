@@ -1,6 +1,6 @@
 # 演習解答欄
 
-## 演習 1.1.2
+## 演習 3.4.2
 
 作成している行（配布時の main.py の行番号）
 agent: 11 `agent = agents.RandomAgent(env)`
@@ -17,30 +17,30 @@ stop_episode_and_train
 stop_episode
 
 env:
-metadata.get
+metadata
 reset
 render
 step
 close
 
-## 演習 1.1.3
+### 演習 3.4.3
 
 平均step数
 
-train:
-test:
+train:56.76
+test:50.63
 
-## 演習 1.1.8
+## 演習 3.4.7
 
 平均step数
 
-train:
-test:
+train:6.97
+test:6.81
 
-train first 10:
-train last 10:
+train first 10:8.4 steps
+train last 10:6.2 steps
 
-## 演習 1.1.10
+## 演習 3.4.9
 
 平均step数
 

@@ -26,22 +26,22 @@ class RulebaseAgent(abstract_agent.Agent):
         self.stop_episode()
 
     def act(self, obs):
+        #obsは現在の座標の位置例えばOrderedDict({'x': 0, 'y': 2})
+        #actionの値は0が右、1が下、2が左、3が上
         # ---穴埋め---
         # 観測を利用して、最短ステップでゴールできるようなactionを返せるようにせよ。
         # 例えば、
-        # print(obs)
+        #print(obs)
         # などとすることで、観測がどのように与えられるかを確認することができる。
         # また、
-        # action = 0
+        #action = 0
         # として実行すれば、「action = 0」が迷路において
         # どのような行動に相当するかを見ることができる。
         # ------------
-        # if  # here #  :
-        #     action =  # here #
-        # else:
-        #     action =  # here #
-        raise NotImplementedError()
-        # ------------
+        if obs['y'] < 2:
+            action = 1
+        else:
+            action =  0
         return action
 
     def train(self, obs, reward):

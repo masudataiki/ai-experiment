@@ -6,16 +6,24 @@ from print_buffer import PrintBuffer
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--quiet", action="store_true", help="毎 step の迷路の出力を止める")
+parser.add_argument("--agent", choices=["random", "rulebase", "tableq"], default="random", help="使う agent")
+parser.add_argument("--env", choices=["EasyMaze-v0", "EasyMazeModified-v0"], default="EasyMaze-v0", help="使う環境")
+parser.add_argument("--show-q", action="store_true", help="Q 値の表を出力する (tableq のみ)")
 args = parser.parse_args()
+if args.show_q and args.agent != "tableq":
+    parser.error("--show-q は --agent tableq のときだけ使える")
 
 
 # 環境と agent を用意
-env_id = 'EasyMaze-v0'
+env_id = args.env
 # env_id = 'CartPole-v0'
 env = gym.make(env_id)
-agent = agents.RandomAgent(env)
-# agent = agents.RulebaseAgent(env)
-# agent = agents.TableQAgent(env)
+if args.agent == "rulebase":
+    agent = agents.RulebaseAgent(env)
+elif args.agent == "tableq":
+    agent = agents.TableQAgent(env)
+else:
+    agent = agents.RandomAgent(env)
 # agent = agents.DQNAgent(env)
 
 
@@ -41,11 +49,14 @@ for interact_mode in ['train', 'test']:  # 一周目: train, 二周目: test
     # 描画するかどうかに合わせて、描画モードを指定して環境を作り直す
     env = gym.make(env_id, render_mode=render_mode if prints_detail[interact_mode] else None)
     sum_of_all_rewards = 0.0  # episode ごとの average reward を出すために、総計を覚えておく
+    sum_of_all_steps = 0
+    array_sum_of_steps = [0]
+
     for i_episode in range(n_episode[interact_mode]):  # 各episode について
         render_buffer.prints('-------------------------------')
         render_buffer.prints('episode: {0} / {1}'.format(i_episode, n_episode[interact_mode]))
         # 環境を初期化して新たな episode を開始する
-        reward, done, sum_of_rewards = 0.0, False, 0.0
+        reward, done, sum_of_rewards,sum_of_steps = 0.0, False, 0.0, 0
         obs, info = env.reset()
         for time in range(n_max_time[interact_mode]):  # 各 step について
             if prints_detail[interact_mode] and render_mode == 'ansi':
@@ -62,6 +73,7 @@ for interact_mode in ['train', 'test']:  # 一周目: train, 二周目: test
             # ゲームが終わった場合も、時間切れで打ち切られた場合も episode を終える
             done = terminated or truncated
             sum_of_rewards += reward
+            sum_of_steps += 1
             render_buffer.prints(interact_mode, 'episode:', i_episode, 'T:', time,
                                  'R:', sum_of_rewards, 'statistics:', agent.get_statistics())
             if prints_detail[interact_mode]:
@@ -84,10 +96,21 @@ for interact_mode in ['train', 'test']:  # 一周目: train, 二周目: test
         else:
             agent.stop_episode()
         sum_of_all_rewards += sum_of_rewards
+        sum_of_all_steps += sum_of_steps
+        array_sum_of_steps.append(array_sum_of_steps[len(array_sum_of_steps) - 1] + sum_of_steps)
         # 数 episodes に一回、統計情報を表示
         if (i_episode + 1) % every_print_statistics[interact_mode] == 0 or prints_detail[interact_mode]:
             average_rewards = sum_of_all_rewards / (i_episode + 1)
-            print(interact_mode, 'episode:', i_episode + 1, 'T:', '???',
+            average_steps = sum_of_all_steps / (i_episode + 1)
+            print(interact_mode, 'episode:', i_episode + 1, 'T:', average_steps,
                   'R:', average_rewards, 'statistics:', agent.get_statistics())
+            if interact_mode == 'train' and args.show_q == True:
+                print(agent.q_table_to_str())
+            if interact_mode == 'train' and i_episode == n_episode['train'] - 1:
+                #ハードコーディングなのでepisode数が10以上に大きくないと動かないので注意する
+                first_ten_average_steps = (array_sum_of_steps[10] - array_sum_of_steps[0]) / 10
+                last_ten_average_steps = (array_sum_of_steps[len(array_sum_of_steps) - 1] - array_sum_of_steps[len(array_sum_of_steps) - 11]) / 10
+                print(f'first_ten_average_steps = {first_ten_average_steps} steps\nlast_ten_average_steps = {last_ten_average_steps} steps')
+
     env.close()  # human モードのウィンドウなどを閉じる
     print(interact_mode, 'finished.')
