@@ -15,6 +15,19 @@
 - 結果: 数値や出力（図があればパスも）
 -->
 
+## 演習3.4.1 準備
+```sh
+pip install gymnasium six
+python main.py | less
+```
+- 変更点: なし
+- 結果: ランダムに動くエージェントの迷路が、step ごとに表示されることを確認した
+
+また、`random_agent.py`と`easymaze_env.py`が配布ファイルのどこにあるのか、以下のように確認した。
+  - `random_agent.py`: `agents/random_agent.py`
+  - `easymaze_env.py`: `gym_easymaze/envs/easymaze_env.py`
+
+
 ## 演習3.4.3 ランダムエージェントの平均step数
 ```sh
 python main.py

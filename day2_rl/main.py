@@ -1,7 +1,12 @@
+import argparse
 import gymnasium as gym
 import gym_easymaze
 import agents
 from print_buffer import PrintBuffer
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--quiet", action="store_true", help="毎 step の迷路の出力を止める")
+args = parser.parse_args()
 
 
 # 環境と agent を用意
@@ -16,7 +21,7 @@ agent = agents.RandomAgent(env)
 
 # 描画設定
 # train時・test時に各 step を描画するかどうか
-prints_detail = {'train': True, 'test': True}
+prints_detail = {'train': not args.quiet, 'test': not args.quiet}
 # 何 episode ごとに統計情報を出力するか
 every_print_statistics = {'train': 10, 'test': 10}
 # 描画モード
