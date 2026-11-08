@@ -6,15 +6,18 @@ from print_buffer import PrintBuffer
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--quiet", action="store_true", help="毎 step の迷路の出力を止める")
-parser.add_argument("--agent", choices=["random", "rulebase", "tableq"], default="random", help="使う agent")
-parser.add_argument("--env", choices=["EasyMaze-v0", "EasyMazeModified-v0"], default="EasyMaze-v0", help="使う環境")
+parser.add_argument("--agent", choices=["random", "rulebase", "tableq","dqn"], default="random", help="使う agent")
+parser.add_argument("--env", choices=["EasyMaze-v0", "EasyMazeModified-v0","CartPole-v0"], default="EasyMaze-v0", help="使う環境")
 parser.add_argument("--show-q", action="store_true", help="Q 値の表を出力する (tableq のみ)")
 parser.add_argument("--greedy-test", action="store_true", help="test 時に greedy で行動する (tableq のみ)")
+parser.add_argument("--dqn-model", choices=["mlp", "linear", "tanh"], default="mlp", help="DQN の Q 関数モデル (dqn のみ)")
 args = parser.parse_args()
 if args.show_q and args.agent != "tableq":
     parser.error("--show-q は --agent tableq のときだけ使える")
 if args.greedy_test and args.agent != "tableq":
     parser.error("--greedy-test は --agent tableq のときだけ使える")
+if args.dqn_model != "mlp" and args.agent != "dqn":
+    parser.error("--dqn-model は --agent dqn のときだけ使える")
 
 
 # 環境と agent を用意
@@ -25,6 +28,8 @@ if args.agent == "rulebase":
     agent = agents.RulebaseAgent(env)
 elif args.agent == "tableq":
     agent = agents.TableQAgent(env, greedy_test=args.greedy_test)
+elif args.agent == "dqn":
+    agent = agents.DQNAgent(env, model_type=args.dqn_model)
 else:
     agent = agents.RandomAgent(env)
 # agent = agents.DQNAgent(env)

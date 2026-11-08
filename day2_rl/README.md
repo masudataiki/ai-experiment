@@ -149,16 +149,43 @@ python main.py --agent tableq --quiet --greedy-test
   - train は確率 ε = 0.3 でランダムに動くことと、学習の初期にQ値が定まっていないことから、step 数が多くなる
   - 乱数シードを固定していないので、train の値は実行ごとに変わる
 
-## 演習3.4.x DQNエージェント
+## 演習3.4.10 DQN エージェント
 ```sh
-python main.py
+python main.py --agent dqn --quiet
+python main.py --agent dqn --dqn-model linear --quiet
+python main.py --agent dqn --dqn-model tanh --quiet
 ```
-- 変更点: 
-- 結果: train xx steps / test xx steps
+- 変更点:
+  - main.py の `--agent` に `dqn` を追加（引数なしなら従来どおり random）
+  - main.py に `--dqn-model` を追加: DQN の Q 関数モデルを切り替える（引数なしなら配布どおりの `mlp`、`--agent dqn` のときだけ使える）
+  - agents/dqn_agent.py: `model_type` を受け取り、`policy_net` と `target_net` の両方に渡す
+  - agents/models/dqn_model.py: `model_type` でモデルを分岐
+    - `mlp`: 配布どおり（7→5→5→4、ReLU）
+    - `linear`: 線形回帰（7→4 の `nn.Linear` 1 層、活性化関数なし）
+    - `tanh`: `mlp` と同じ構成で、活性化関数を tanh に変えた
+- 結果:
 
-## 演習3.4.x CartPole
+| モデル | train | test | train 最初の10エピソード | train 最後の10エピソード |
+|---|---|---|---|---|
+| mlp | 13.51 steps | 5.0 steps | 33.5 steps | 9.7 steps |
+| linear | 15.9 steps | 5.0 steps | 94.8 steps | 6.5 steps |
+| tanh | 18.83 steps | 300.0 steps | 71.4 steps | 12.4 steps |
+
+  - どのモデルでも test は最短の 5 steps でゴールできた
+  - 乱数シードを固定していないので、実行ごとに値は変わる（test が 300 steps で、ゴールできないこともある）
+
+## 演習3.4.11 CartPole
 ```sh
-python main.py
+python main.py --agent dqn --env CartPole-v0 --quiet
 ```
-- 変更点: 
-- 結果: 
+- 変更点: main.py の `--env` に `CartPole-v0` を追加（引数なしなら従来どおり `EasyMaze-v0`）
+  - agents/dqn_agent.py と agents/models/dqn_model.py は変更していない
+- 結果:
+
+| train | test | train 最初の10エピソード | train 最後の10エピソード |
+|---|---|---|---|
+| 24.18 点 | 50.92 点 | 10.4 点 | 37.4 点 |
+
+  - 各 step の報酬が 1 なので、step 数と点数は同じ値になる
+  - 点数の最大値は 200 で、学習で点数は上がったが、200 点には届かなかった
+  - 乱数シードを固定していないので、実行ごとに値は変わる

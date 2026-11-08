@@ -14,7 +14,8 @@ import numpy as np
 class DQNAgent(abstract_agent.Agent):
     """Deep Q NeuralNetwork Agent
     """
-    def __init__(self, env):
+    def __init__(self, env, model_type='mlp'):
+        # model_type: Q 関数モデルの種類 (models.DQNModel に渡す。'mlp' が配布どおり)
         # 観測をいい感じに処理する
         self.obs_space = env.observation_space
         self.flatten, self.obs_size = Utils.get_flatten_function_and_size(self.obs_space)
@@ -22,8 +23,8 @@ class DQNAgent(abstract_agent.Agent):
 
         # model (neural network) を作る
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.policy_net = models.DQNModel(self.obs_size, self.n_actions).to(self.device)
-        self.target_net = models.DQNModel(self.obs_size, self.n_actions).to(self.device)
+        self.policy_net = models.DQNModel(self.obs_size, self.n_actions, model_type).to(self.device)
+        self.target_net = models.DQNModel(self.obs_size, self.n_actions, model_type).to(self.device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 
