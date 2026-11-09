@@ -62,6 +62,23 @@ python test_mnist_mlp.py -g -1 -m result/mlp/model_20 -i my_digit.png --topk 3
 |---|---|---|---|---|
 | my_digit.png | 8 | 3 | 2 | 5 |
 
+## 演習4.2.5 中間ノード数の変更
+```sh
+python train_mnist_mlp.py -g 0 -u 3 -f 100 -o result/mlp_u3
+python train_mnist_mlp.py -g 0 -u 10000 -f 100 -o result/mlp_u10000
+```
+- 変更点: train_mnist_mlp.py（学習終了時に最終精度を表示する1行を追加。学習の動作は変わらない）
+- 設定: epoch 20, batchsize 100, unit のみ変更（`-f 100` は途中のモデルを保存しない指定）
+- 実行環境: Google Colab GPU（T4）
+- 結果: 20エポック目の精度と学習時間（`time` の real）
+
+| 中間ノード数 | train | validation | かかった時間 |
+|---|---|---|---|
+| 3 | 68.36% | 68.37% | 2分49.4秒 |
+| 10000 | 96.29% | 94.97% | 7分23.7秒 |
+
+- 比較: 中間ノード数 10000 は 3 より validation の精度が 26.60 ポイント高く、学習時間は約 2.6 倍だった。
+
 ## 演習4.2.6 CNN実装
 ```sh
 python train_mnist_cnn.py -g 0 -o result/cnn

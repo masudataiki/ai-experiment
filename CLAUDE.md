@@ -27,3 +27,5 @@
 - フォルダを Colab にアップロードする方法は使わない。
 - 実行コマンドは `| tee result/<名前>/train.log` を付けてログを Drive に残す。
 - 結果は Drive の AI_Experiment/results/<day>/ に保存される。README 用には Mac の <day>/result/ にダウンロードして使う。
+
+- Git のブランチは作らず、すべて main で作業・コミット・push する（Colab は main を取得するため）。

@@ -32,8 +32,8 @@ def main():
 	print('')
 
 	# Set up a neural network to train
-	net = MLP(args.unit, 28*28, 10)
-	#net = MnistCNN(10)
+	#net = MLP(args.unit, 28*28, 10)
+	net = MnistCNN(10)
 
 	# Load designated network weight 
 	if args.resume:
@@ -132,6 +132,7 @@ def main():
 		ac_val.append(100 * correct_val / total_val)
 
 	print('Finished Training')
+	print('Final accuracy: train %.2f%%, validation %.2f%%' % (ac_train[-1], ac_val[-1]))
 	path = args.out + "/model_final"
 	torch.save(net.state_dict(), path)
 
