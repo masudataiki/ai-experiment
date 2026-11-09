@@ -83,8 +83,25 @@ python train_mnist_mlp.py -g 0 -u 10000 -f 100 -o result/mlp_u10000
 ```sh
 python train_mnist_cnn.py -g 0 -o result/cnn
 ```
-- 変更点: 
-- 結果: 検証精度 xx% (図のパス)
+- 変更点:
+  - network.py の `MnistCNN.__init__`（66-67行目）: 畳み込み層2つを実装
+    - `conv1`: `nn.Conv2d(1, 5, 5, stride=2, padding=2)`（1 × 28 × 28 → 5 × 14 × 14）
+    - `conv2`: `nn.Conv2d(5, 10, 5, stride=2, padding=2)`（5 × 14 × 14 → 10 × 7 × 7）
+    - stride と padding は、カーネルサイズ 5 で縦横が半分になるよう、どちらの層も stride 2、padding 2 を選んだ
+  - train_mnist_cnn.py（35-36行目）: `net = MLP(...)` をコメントアウトし、`net = MnistCNN(10)` に切り替え
+  - train_mnist_cnn.py: 学習終了時に最終精度を表示する1行を追加
+- 設定: デフォルト（epoch 20, batchsize 100）
+- 実行環境: Google Colab GPU（Tesla T4）
+- 結果: 20エポック目の精度と学習時間（`time` の real）。演習4.2.1 の MLP の精度はグラフからの読み取り値
+
+| モデル | train | validation | かかった時間 |
+|---|---|---|---|
+| MLP（演習4.2.1、unit 1000） | 約 95.0% | 約 94.5% | 2分51.7秒 |
+| CNN（演習4.2.6） | 96.96% | 96.80% | 2分54.4秒 |
+
+- 比較: CNN は MLP より validation の精度が約 2.3 ポイント高く、学習時間は約 2.6 秒長かった。
+
+![CNNの学習曲線](figures/4.2.6_cnn_accuracy.png)
 
 ## 演習4.x.x CIFAR-10の学習
 ```sh
