@@ -27,7 +27,16 @@ def main():
 						help='Resume the training from snapshot')
 	parser.add_argument('--dataset', '-d', default='data/mini_cifar',
 						help='Root directory of dataset')
+	parser.add_argument('--seed', type=int, default=None,
+						help='Random seed (default: do not fix the seed)')
 	args = parser.parse_args()
+
+	# Fix the random seed only when --seed is given
+	if args.seed is not None:
+		torch.manual_seed(args.seed)
+		torch.backends.cudnn.deterministic = True
+		torch.backends.cudnn.benchmark = False
+		print('# seed: {}'.format(args.seed))
 
 	print('GPU: {}'.format(args.gpu))
 	print('# Minibatch-size: {}'.format(args.batchsize))
