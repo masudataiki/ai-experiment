@@ -29,7 +29,7 @@ def main():
 	# Set up a neural network to test
 	net = MLP(args.unit, 28*28, 10)
 	# Load designated network weight 
-	net.load_state_dict(torch.load(args.model))
+	net.load_state_dict(torch.load(args.model, map_location='cpu'))
 	# Set model to GPU
 	device = 'cpu'
 	if args.gpu >= 0:
