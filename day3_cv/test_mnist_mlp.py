@@ -21,6 +21,8 @@ def main():
 						help='Path to the model for test')
 	parser.add_argument('--unit', '-u', type=int, default=1000,
 						help='Number of units')
+	parser.add_argument('--topk', type=int, default=1,
+						help='Number of predicted labels to print (1: same output as exercise 4.2.3)')
 	args = parser.parse_args()
 
 	print('GPU: {}'.format(args.gpu))
@@ -52,9 +54,13 @@ def main():
 		# Forward
 		outputs = net(image)
 		# Predict the label
-		_, predicted = torch.max(outputs, 1)
-		# Print the result
-		print('Predicted label : {}'.format(predicted.item()))
+		if args.topk == 1:
+			_, predicted = torch.max(outputs, 1)
+			# Print the result
+			print('Predicted label : {}'.format(predicted.item()))
+		else:
+			_, indices = torch.topk(outputs, args.topk, largest=True)
+			print('Predicted label : {}'.format(indices))
 
 if __name__ == '__main__':
 	main()

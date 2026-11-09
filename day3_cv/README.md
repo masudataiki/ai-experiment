@@ -49,6 +49,19 @@ python test_mnist_mlp.py -g -1 -m result/mlp/model_20 -i my_digit.png
 |---|---|---|---|
 | my_digit.png | 8 | 3 | 誤り |
 
+## 演習4.2.4 予測の上位3つの表示
+```sh
+python test_mnist_mlp.py -g -1 -m result/mlp/model_20 -i my_digit.png --topk 3
+```
+- 変更点: test_mnist_mlp.py（`--topk 3` で次を切り替える。既定の `--topk 1` は演習4.2.3 と同じ表示）
+  - 予測: `torch.topk` で確信度が高い順に上位 `args.topk` 個の数字を取り出して表示する
+- 実行環境: Mac の CPU（モデルは Colab の GPU で学習した20エポック目のもの）
+- 結果: 
+
+| 入力 | 正解 | 1位 | 2位 | 3位 |
+|---|---|---|---|---|
+| my_digit.png | 8 | 3 | 2 | 5 |
+
 ## 演習4.2.6 CNN実装
 ```sh
 python train_mnist_cnn.py -g 0 -o result/cnn
