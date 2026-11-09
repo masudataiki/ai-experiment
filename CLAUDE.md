@@ -20,4 +20,10 @@
 - 演習のコードが実験書のどの式（例: 式(2.1)）に対応するかを、式番号つきで示す。
 - 実験書の記法（W_h, U_h, h_t など）とコードの変数名（Wxhi, Whrhr など）の対応表を示す。
 - 穴埋めは、答えのコードを先に書かない。場所・方針・ヒントを示し、私が書いたものをレビューする。
-- 
+
+# GPU が必要な実行（Colab）
+- コードは Mac で編集して GitHub に push し、Colab のノート（Drive の Colab Notebooks）で
+  セル1〜3（Drive 接続 → git clone/pull → data/ と result/ を Drive にリンク）を実行してから使う。
+- フォルダを Colab にアップロードする方法は使わない。
+- 実行コマンドは `| tee result/<名前>/train.log` を付けてログを Drive に残す。
+- 結果は Drive の AI_Experiment/results/<day>/ に保存される。README 用には Mac の <day>/result/ にダウンロードして使う。
