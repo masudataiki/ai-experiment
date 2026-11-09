@@ -93,7 +93,7 @@ class   CifarCNN(nn.Module):
 	"""
 	Network / Convolutional newral network for Cifar10 task
 	"""
-	def __init__(self, n_out):
+	def __init__(self, n_out, ch1=6, ch2=16):
 		"""
 		Construct CNN
 
@@ -101,14 +101,19 @@ class   CifarCNN(nn.Module):
 		----------
 		n_out	: int
 			dimension of output
+		ch1	: int
+			number of output channels of conv1
+		ch2	: int
+			number of output channels of conv2
 		"""
 		super(CifarCNN, self).__init__()
 
-		self.conv1 = nn.Conv2d(3, 6, 5, stride=1)	# 3 * 32 * 32 -> 6 * 28 * 28
-		self.pool = nn.MaxPool2d(2, 2)	# 6 * 28 * 28 -> 6 * 14 * 14
-		self.conv2 = nn.Conv2d(6, 16, 5, stride=1)	# 6 * 14 * 14 -> 16 * 10 * 10
-		#self.pool = nn.MaxPool2d(2, 2)	# 16 * 10 * 10 -> 16 * 5 * 5
-		self.fc = nn.Linear(16 * 5 * 5, n_out)	# 400(=16*5*5) -> n_out
+		self.ch2 = ch2
+		self.conv1 = nn.Conv2d(3, ch1, 5, stride=1)	# 3 * 32 * 32 -> ch1 * 28 * 28
+		self.pool = nn.MaxPool2d(2, 2)	# ch1 * 28 * 28 -> ch1 * 14 * 14
+		self.conv2 = nn.Conv2d(ch1, ch2, 5, stride=1)	# ch1 * 14 * 14 -> ch2 * 10 * 10
+		#self.pool = nn.MaxPool2d(2, 2)	# ch2 * 10 * 10 -> ch2 * 5 * 5
+		self.fc = nn.Linear(ch2 * 5 * 5, n_out)	# ch2 * 5 * 5 -> n_out
 
 	def forward(self, x):
 		"""
@@ -128,6 +133,6 @@ class   CifarCNN(nn.Module):
 		"""
 		h = self.pool(F.relu(self.conv1(x)))
 		h = self.pool(F.relu(self.conv2(h)))
-		h = h.view(-1, 16 * 5 * 5)
+		h = h.view(-1, self.ch2 * 5 * 5)
 		y = self.fc(h)
 		return y

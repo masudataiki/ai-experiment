@@ -151,11 +151,13 @@ python train_cifar10.py -g 0 -o result/cifar10_exp0 -d /content/mini_cifar --see
 python train_cifar10.py -g 0 -e 100 -o result/cifar10_expA -d /content/mini_cifar --seed 0 -f 200
 python train_cifar10.py -g 0 --optimizer adam -o result/cifar10_expB -d /content/mini_cifar --seed 0 -f 100
 python train_cifar10.py -g 0 -e 100 --optimizer adam -o result/cifar10_expB2 -d /content/mini_cifar --seed 0 -f 200
+python train_cifar10.py -g 0 -e 100 --optimizer adam --augment -o result/cifar10_expF -d /content/mini_cifar --seed 0 -f 200
 ```
 - 変更点: train_cifar10.py に次の引数と表示を追加
   - `--seed`（既定は固定しない）とエポックごとの精度表示（学習の動作は変わらない）
   - `--optimizer`（既定は `sgd` で従来どおり。`adam` で `optim.Adam(net.parameters(), lr=0.001)` に切り替える）
-- 設定: epoch 20（実験A, B2 は 100）, batchsize 100, seed 0, データは mini_cifar（Colab のローカルディスクにコピーして使用）。`-f` は途中のモデルを保存しない指定
+  - `--augment`（既定はなしで従来どおり。付けると学習データにだけ `RandomHorizontalFlip` と `RandomCrop(32, padding=4)` をかける。検証データは拡張なしのまま）
+- 設定: epoch 20（実験A, B2, F は 100）, batchsize 100, seed 0, データは mini_cifar（Colab のローカルディスクにコピーして使用）。`-f` は途中のモデルを保存しない指定
 - 実行環境: Google Colab GPU（Tesla T4）
 - 結果: 学習時間は `time` の real
 
@@ -165,6 +167,9 @@ python train_cifar10.py -g 0 -e 100 --optimizer adam -o result/cifar10_expB2 -d 
 | A | エポック数 20→100 | 6,882 | 38.30% | 46.67%（100エポック目） | — | 1分15.0秒 |
 | B | 最適化手法 SGD→Adam（lr=0.001）※以降はBを基準とする | 6,882 | 44.59% | 42.67%（16エポック目） | — | 19.9秒 |
 | B2 | Bからエポック数 20→100 | 6,882 | 72.89% | 53.33%（84エポック目） | 48.07%（81〜100エポック目） | 1分13.9秒 |
+| F | B2にデータ拡張（左右反転 + RandomCrop(32, padding=4)）を追加 | 6,882 | 48.00% | 58.00%（71, 76エポック目） | 54.47%（81〜100エポック目） | 1分23.7秒 |
+
+実験F は 100エポック目でもまだゆるやかに上がっている（検証精度の平均は 61〜80エポック目 53.70% → 81〜100エポック目 54.47%、loss は 80エポック目 20.957 → 100エポック目 19.839）。
 
 実験0
 
@@ -181,6 +186,10 @@ python train_cifar10.py -g 0 -e 100 --optimizer adam -o result/cifar10_expB2 -d 
 実験B2
 
 ![実験B2の学習曲線](figures/4.2.9_expB2_accuracy.png)
+
+実験F
+
+![実験Fの学習曲線](figures/4.2.9_expF_accuracy.png)
 
 ## 演習4.3.x 深層特徴データベースの作成
 ```sh

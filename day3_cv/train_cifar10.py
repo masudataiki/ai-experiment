@@ -34,6 +34,10 @@ def main():
 						help='Optimizer (sgd: lr=0.001, momentum=0.9 / adam: lr=0.001)')
 	parser.add_argument('--augment', action='store_true',
 						help='Apply random flip and crop to the training data only')
+	parser.add_argument('--ch1', type=int, default=6,
+						help='Number of output channels of conv1')
+	parser.add_argument('--ch2', type=int, default=16,
+						help='Number of output channels of conv2')
 	args = parser.parse_args()
 
 	# Fix the random seed only when --seed is given
@@ -49,7 +53,7 @@ def main():
 	print('')
 
 	# Set up a neural network to train
-	net = CifarCNN(10)
+	net = CifarCNN(10, args.ch1, args.ch2)
 	# Load designated network weight
 	if args.resume:
 		net.load_state_dict(torch.load(args.resume))
