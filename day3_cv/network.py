@@ -93,7 +93,7 @@ class   CifarCNN(nn.Module):
 	"""
 	Network / Convolutional newral network for Cifar10 task
 	"""
-	def __init__(self, n_out, ch1=6, ch2=16):
+	def __init__(self, n_out, ch1=6, ch2=16, dropout=0.0):
 		"""
 		Construct CNN
 
@@ -105,10 +105,13 @@ class   CifarCNN(nn.Module):
 			number of output channels of conv1
 		ch2	: int
 			number of output channels of conv2
+		dropout	: float
+			dropout probability before the fully connected layer (0: no dropout)
 		"""
 		super(CifarCNN, self).__init__()
 
 		self.ch2 = ch2
+		self.dropout = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
 		self.conv1 = nn.Conv2d(3, ch1, 5, stride=1)	# 3 * 32 * 32 -> ch1 * 28 * 28
 		self.pool = nn.MaxPool2d(2, 2)	# ch1 * 28 * 28 -> ch1 * 14 * 14
 		self.conv2 = nn.Conv2d(ch1, ch2, 5, stride=1)	# ch1 * 14 * 14 -> ch2 * 10 * 10
@@ -134,5 +137,6 @@ class   CifarCNN(nn.Module):
 		h = self.pool(F.relu(self.conv1(x)))
 		h = self.pool(F.relu(self.conv2(h)))
 		h = h.view(-1, self.ch2 * 5 * 5)
+		h = self.dropout(h)
 		y = self.fc(h)
 		return y

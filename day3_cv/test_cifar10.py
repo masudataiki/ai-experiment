@@ -20,6 +20,12 @@ def main():
 						help='Path to the model for test')
 	parser.add_argument('--dataset', '-d', default='data/mini_cifar',
 						help='Root directory of dataset')
+	parser.add_argument('--ch1', type=int, default=6,
+						help='Number of output channels of conv1')
+	parser.add_argument('--ch2', type=int, default=16,
+						help='Number of output channels of conv2')
+	parser.add_argument('--dropout', type=float, default=0.0,
+						help='Dropout probability used in training (disabled by net.eval())')
 	args = parser.parse_args()
 
 	print('GPU: {}'.format(args.gpu))
@@ -27,7 +33,7 @@ def main():
 	print('')
 
 	# Set up a neural network to test
-	net = CifarCNN(10)
+	net = CifarCNN(10, args.ch1, args.ch2, args.dropout)
 	# Load designated network weight
 	net.load_state_dict(torch.load(args.model))
 	# Set model to GPU
@@ -43,6 +49,7 @@ def main():
 											 shuffle=False, num_workers=2)
 
 	# Test
+	net.eval()
 	correct = 0
 	total = 0
 	class_correct = list(0. for i in range(10))

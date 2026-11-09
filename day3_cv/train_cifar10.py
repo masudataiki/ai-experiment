@@ -38,6 +38,8 @@ def main():
 						help='Number of output channels of conv1')
 	parser.add_argument('--ch2', type=int, default=16,
 						help='Number of output channels of conv2')
+	parser.add_argument('--dropout', type=float, default=0.0,
+						help='Dropout probability before the fully connected layer (0: no dropout)')
 	args = parser.parse_args()
 
 	# Fix the random seed only when --seed is given
@@ -53,7 +55,7 @@ def main():
 	print('')
 
 	# Set up a neural network to train
-	net = CifarCNN(10, args.ch1, args.ch2)
+	net = CifarCNN(10, args.ch1, args.ch2, args.dropout)
 	# Load designated network weight
 	if args.resume:
 		net.load_state_dict(torch.load(args.resume))
@@ -143,6 +145,7 @@ def main():
 			torch.save(net.state_dict(), path)
 
 		# Validation
+		net.eval()
 		with torch.no_grad():
 			for data in valloader:
 				images, labels = data
@@ -157,6 +160,8 @@ def main():
 				for i in range(len(predicted)):
 					correct_val += c[i].item()
 					total_val += 1
+
+		net.train()
 
 		# Record result
 		x.append(ep + 1)

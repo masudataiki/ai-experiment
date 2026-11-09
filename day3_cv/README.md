@@ -152,12 +152,14 @@ python train_cifar10.py -g 0 -e 100 -o result/cifar10_expA -d /content/mini_cifa
 python train_cifar10.py -g 0 --optimizer adam -o result/cifar10_expB -d /content/mini_cifar --seed 0 -f 100
 python train_cifar10.py -g 0 -e 100 --optimizer adam -o result/cifar10_expB2 -d /content/mini_cifar --seed 0 -f 200
 python train_cifar10.py -g 0 -e 100 --optimizer adam --augment -o result/cifar10_expF -d /content/mini_cifar --seed 0 -f 200
+python train_cifar10.py -g 0 -e 100 --optimizer adam --augment --ch1 32 --ch2 64 -o result/cifar10_expC -d /content/mini_cifar --seed 0 -f 200
 ```
 - 変更点: train_cifar10.py に次の引数と表示を追加
   - `--seed`（既定は固定しない）とエポックごとの精度表示（学習の動作は変わらない）
   - `--optimizer`（既定は `sgd` で従来どおり。`adam` で `optim.Adam(net.parameters(), lr=0.001)` に切り替える）
   - `--augment`（既定はなしで従来どおり。付けると学習データにだけ `RandomHorizontalFlip` と `RandomCrop(32, padding=4)` をかける。検証データは拡張なしのまま）
-- 設定: epoch 20（実験A, B2, F は 100）, batchsize 100, seed 0, データは mini_cifar（Colab のローカルディスクにコピーして使用）。`-f` は途中のモデルを保存しない指定
+  - `--ch1`, `--ch2`（既定は 6, 16 で従来どおり。network.py の `CifarCNN` の conv1, conv2 の出力チャンネル数を変え、全結合層の入力も `ch2 × 5 × 5` に合わせる）
+- 設定: epoch 20（実験A, B2, F, C は 100）, batchsize 100, seed 0, データは mini_cifar（Colab のローカルディスクにコピーして使用）。`-f` は途中のモデルを保存しない指定
 - 実行環境: Google Colab GPU（Tesla T4）
 - 結果: 学習時間は `time` の real
 
@@ -168,6 +170,7 @@ python train_cifar10.py -g 0 -e 100 --optimizer adam --augment -o result/cifar10
 | B | 最適化手法 SGD→Adam（lr=0.001）※以降はBを基準とする | 6,882 | 44.59% | 42.67%（16エポック目） | — | 19.9秒 |
 | B2 | Bからエポック数 20→100 | 6,882 | 72.89% | 53.33%（84エポック目） | 48.07%（81〜100エポック目） | 1分13.9秒 |
 | F | B2にデータ拡張（左右反転 + RandomCrop(32, padding=4)）を追加 | 6,882 | 48.00% | 58.00%（71, 76エポック目） | 54.47%（81〜100エポック目） | 1分23.7秒 |
+| C | Fからチャンネル数を増やす（conv1 6→32、conv2 16→64） | 69,706 | 65.70% | 56.67%（95エポック目） | 51.23%（81〜100エポック目） | 1分28.7秒 |
 
 実験F は 100エポック目でもまだゆるやかに上がっている（検証精度の平均は 61〜80エポック目 53.70% → 81〜100エポック目 54.47%、loss は 80エポック目 20.957 → 100エポック目 19.839）。
 
@@ -190,6 +193,10 @@ python train_cifar10.py -g 0 -e 100 --optimizer adam --augment -o result/cifar10
 実験F
 
 ![実験Fの学習曲線](figures/4.2.9_expF_accuracy.png)
+
+実験C
+
+![実験Cの学習曲線](figures/4.2.9_expC_accuracy.png)
 
 ## 演習4.3.x 深層特徴データベースの作成
 ```sh
