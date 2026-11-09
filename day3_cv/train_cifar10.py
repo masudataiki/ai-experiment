@@ -140,6 +140,7 @@ def main():
 		x.append(ep + 1)
 		ac_train.append(100 * correct_train / total_train)
 		ac_val.append(100 * correct_val / total_val)
+		print('[epoch %d] accuracy: train %.2f%%, validation %.2f%%' % (ep + 1, ac_train[-1], ac_val[-1]))
 
 	print('Finished Training')
 	path = args.out + "/model_final"
