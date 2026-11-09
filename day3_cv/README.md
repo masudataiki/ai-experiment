@@ -122,12 +122,28 @@ python train_cifar10.py -g 0 -o result/cifar10 -d data/mini_cifar
 
 ![CIFAR-10の学習曲線](figures/4.2.7_cifar_accuracy.png)
 
-## 演習4.x.x CIFAR-10のテスト
+## 演習4.2.8 CIFAR-10のテスト
 ```sh
-python test_cifar10.py -g 0 -m result/cifar10/model_final -d data/mini_cifar
+python test_cifar10.py -g 0 -b 64 -m result/cifar10/model_18 -d data/mini_cifar
 ```
-- 変更点: 
-- 結果: テスト精度 xx%
+- 変更点: なし
+- 設定: `-b 64`（テストは 201 枚なので、バッチサイズ 100 だと最後のバッチが1枚になり、`.squeeze()` のため `IndexError` になる。精度は1枚ずつ数えるのでバッチサイズの影響を受けない）
+- 使用モデル: `model_18`（演習4.2.7 のグラフで validation が最も高いエポックのうち、最も後のもの。グラフからの読み取り）
+- 実行環境: Google Colab GPU（Tesla T4）
+- 結果: テスト精度 12.438%
+
+| クラス | 精度 |
+|---|---|
+| airplane | 15% |
+| automobile | 5% |
+| bird | 0% |
+| cat | 0% |
+| deer | 10% |
+| dog | 85% |
+| frog | 0% |
+| horse | 0% |
+| ship | 9% |
+| truck | 0% |
 
 ## 演習4.3.x 深層特徴データベースの作成
 ```sh
