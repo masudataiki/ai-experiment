@@ -14,7 +14,7 @@ import numpy as np
 class DQNAgent(abstract_agent.Agent):
     """Deep Q NeuralNetwork Agent
     """
-    def __init__(self, env, model_type='mlp'):
+    def __init__(self, env, model_type='mlp', lr=0.01, hidden_sizes=(5, 5), eps=0.3, replay_buffer_size=10**6, eps_decay=None, target_update_interval=100):
         # model_type: Q 関数モデルの種類 (models.DQNModel に渡す。'mlp' が配布どおり)
         # 観測をいい感じに処理する
         self.obs_space = env.observation_space
@@ -23,8 +23,8 @@ class DQNAgent(abstract_agent.Agent):
 
         # model (neural network) を作る
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.policy_net = models.DQNModel(self.obs_size, self.n_actions, model_type).to(self.device)
-        self.target_net = models.DQNModel(self.obs_size, self.n_actions, model_type).to(self.device)
+        self.policy_net = models.DQNModel(self.obs_size, self.n_actions, model_type, hidden_sizes).to(self.device)
+        self.target_net = models.DQNModel(self.obs_size, self.n_actions, model_type, hidden_sizes).to(self.device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 
@@ -35,20 +35,25 @@ class DQNAgent(abstract_agent.Agent):
         self.discount_factor = 0.95
 
         # リプレイバッファの設定
-        self.replay_buffer_size = 10**6
+        self.replay_buffer_size = replay_buffer_size
         self.replay_buffer = replay_buffer.ReplayBuffer(self.replay_buffer_size)
 
         # epsilon-greedyで使用する
-        self.eps = 0.3
+        self.eps = eps
+        # eps_decay が None なら eps は固定。指定すると eps_decay エピソードかけて 0.01 まで直線的に小さくする
+        self.eps_start = eps
+        self.eps_end = 0.01
+        self.eps_decay = eps_decay
+        self.n_trained_episodes = 0
 
         # リプレイバッファに格納された経験がreplay_start_sizeを超えるまでは学習を行わない
         self.replay_start_size = 500
 
         # target_netとpolicy_netをどれくらいのタイムステップごとに同期させるか
-        self.target_update_intervel = 100
+        self.target_update_intervel = target_update_interval
 
         # DQNの更新に使用するオプティマイザ
-        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=0.01)
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=lr)
 
         # 直前のタイムステップにおける状態と行動
         self.last_state = None
@@ -70,6 +75,10 @@ class DQNAgent(abstract_agent.Agent):
     def stop_episode_and_train(self, obs, reward, done):
         self.train(obs, reward, done)
         self.stop_episode()
+        self.n_trained_episodes += 1
+        if self.eps_decay is not None:
+            progress = min(self.n_trained_episodes / self.eps_decay, 1.0)
+            self.eps = self.eps_start + (self.eps_end - self.eps_start) * progress
 
     def stop_episode(self):
         self.last_state = None
