@@ -1,5 +1,6 @@
 
 import argparse
+import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -31,6 +32,8 @@ def main():
 						help='Random seed (default: do not fix the seed)')
 	parser.add_argument('--optimizer', choices=['sgd', 'adam'], default='sgd',
 						help='Optimizer (sgd: lr=0.001, momentum=0.9 / adam: lr=0.001)')
+	parser.add_argument('--augment', action='store_true',
+						help='Apply random flip and crop to the training data only')
 	args = parser.parse_args()
 
 	# Fix the random seed only when --seed is given
@@ -73,6 +76,16 @@ def main():
 	trainsize = int(n_samples * 0.9)
 	valsize = n_samples - trainsize
 	trainset, valset = torch.utils.data.random_split(trainvalset, [trainsize, valsize])
+
+	# Data augmentation for the training data only.
+	# valset keeps using trainvalset, whose transform has no random operation.
+	if args.augment:
+		augmentset = copy.copy(trainvalset)
+		augmentset.transform = transforms.Compose([
+			transforms.RandomHorizontalFlip(),
+			transforms.RandomCrop(32, padding=4),
+			transforms.ToTensor()])
+		trainset = torch.utils.data.Subset(augmentset, trainset.indices)
 
 	trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batchsize,
 											  shuffle=True, num_workers=2)

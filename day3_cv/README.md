@@ -149,16 +149,22 @@ python test_cifar10.py -g 0 -b 64 -m result/cifar10/model_18 -d data/mini_cifar
 ```sh
 python train_cifar10.py -g 0 -o result/cifar10_exp0 -d /content/mini_cifar --seed 0 -f 100
 python train_cifar10.py -g 0 -e 100 -o result/cifar10_expA -d /content/mini_cifar --seed 0 -f 200
+python train_cifar10.py -g 0 --optimizer adam -o result/cifar10_expB -d /content/mini_cifar --seed 0 -f 100
+python train_cifar10.py -g 0 -e 100 --optimizer adam -o result/cifar10_expB2 -d /content/mini_cifar --seed 0 -f 200
 ```
-- 変更点: train_cifar10.py に `--seed`（既定は固定しない）とエポックごとの精度表示を追加（学習の動作は変わらない）
-- 設定: epoch 20（実験A は 100）, batchsize 100, seed 0, データは mini_cifar（Colab のローカルディスクにコピーして使用）。`-f` は途中のモデルを保存しない指定
+- 変更点: train_cifar10.py に次の引数と表示を追加
+  - `--seed`（既定は固定しない）とエポックごとの精度表示（学習の動作は変わらない）
+  - `--optimizer`（既定は `sgd` で従来どおり。`adam` で `optim.Adam(net.parameters(), lr=0.001)` に切り替える）
+- 設定: epoch 20（実験A, B2 は 100）, batchsize 100, seed 0, データは mini_cifar（Colab のローカルディスクにコピーして使用）。`-f` は途中のモデルを保存しない指定
 - 実行環境: Google Colab GPU（Tesla T4）
 - 結果: 学習時間は `time` の real
 
-| 実験 | 変えたこと | パラメータ数 | 最終エポックの学習精度 | 検証精度の最大値（何エポック目） | 学習時間 |
-|---|---|---|---|---|---|
-| 0 | 変更なし（ベースライン） | 6,882 | 15.11% | 13.33%（2〜4エポック目） | 19.8秒 |
-| A | エポック数 20→100 | 6,882 | 38.30% | 46.67%（100エポック目） | 1分15.0秒 |
+| 実験 | 変えたこと | パラメータ数 | 最終エポックの学習精度 | 検証精度の最大値（何エポック目） | 最後の20エポックの検証精度の平均 | 学習時間 |
+|---|---|---|---|---|---|---|
+| 0 | 変更なし（ベースライン） | 6,882 | 15.11% | 13.33%（2〜4エポック目） | — | 19.8秒 |
+| A | エポック数 20→100 | 6,882 | 38.30% | 46.67%（100エポック目） | — | 1分15.0秒 |
+| B | 最適化手法 SGD→Adam（lr=0.001）※以降はBを基準とする | 6,882 | 44.59% | 42.67%（16エポック目） | — | 19.9秒 |
+| B2 | Bからエポック数 20→100 | 6,882 | 72.89% | 53.33%（84エポック目） | 48.07%（81〜100エポック目） | 1分13.9秒 |
 
 実験0
 
@@ -167,6 +173,14 @@ python train_cifar10.py -g 0 -e 100 -o result/cifar10_expA -d /content/mini_cifa
 実験A
 
 ![実験Aの学習曲線](figures/4.2.9_expA_accuracy.png)
+
+実験B
+
+![実験Bの学習曲線](figures/4.2.9_expB_accuracy.png)
+
+実験B2
+
+![実験B2の学習曲線](figures/4.2.9_expB2_accuracy.png)
 
 ## 演習4.3.x 深層特徴データベースの作成
 ```sh
