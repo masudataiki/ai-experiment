@@ -145,6 +145,29 @@ python test_cifar10.py -g 0 -b 64 -m result/cifar10/model_18 -d data/mini_cifar
 | ship | 9% |
 | truck | 0% |
 
+## 演習4.2.9 CIFAR-10 の精度向上（発展課題）
+```sh
+python train_cifar10.py -g 0 -o result/cifar10_exp0 -d /content/mini_cifar --seed 0 -f 100
+python train_cifar10.py -g 0 -e 100 -o result/cifar10_expA -d /content/mini_cifar --seed 0 -f 200
+```
+- 変更点: train_cifar10.py に `--seed`（既定は固定しない）とエポックごとの精度表示を追加（学習の動作は変わらない）
+- 設定: epoch 20（実験A は 100）, batchsize 100, seed 0, データは mini_cifar（Colab のローカルディスクにコピーして使用）。`-f` は途中のモデルを保存しない指定
+- 実行環境: Google Colab GPU（Tesla T4）
+- 結果: 学習時間は `time` の real
+
+| 実験 | 変えたこと | パラメータ数 | 最終エポックの学習精度 | 検証精度の最大値（何エポック目） | 学習時間 |
+|---|---|---|---|---|---|
+| 0 | 変更なし（ベースライン） | 6,882 | 15.11% | 13.33%（2〜4エポック目） | 19.8秒 |
+| A | エポック数 20→100 | 6,882 | 38.30% | 46.67%（100エポック目） | 1分15.0秒 |
+
+実験0
+
+![実験0の学習曲線](figures/4.2.9_exp0_accuracy.png)
+
+実験A
+
+![実験Aの学習曲線](figures/4.2.9_expA_accuracy.png)
+
 ## 演習4.3.x 深層特徴データベースの作成
 ```sh
 python create_db.py -g 0 -d データセットのパス

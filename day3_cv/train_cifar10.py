@@ -29,6 +29,8 @@ def main():
 						help='Root directory of dataset')
 	parser.add_argument('--seed', type=int, default=None,
 						help='Random seed (default: do not fix the seed)')
+	parser.add_argument('--optimizer', choices=['sgd', 'adam'], default='sgd',
+						help='Optimizer (sgd: lr=0.001, momentum=0.9 / adam: lr=0.001)')
 	args = parser.parse_args()
 
 	# Fix the random seed only when --seed is given
@@ -56,7 +58,10 @@ def main():
 
 	# Setup a loss and an optimizer
 	criterion = nn.CrossEntropyLoss()
-	optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+	if args.optimizer == 'adam':
+		optimizer = optim.Adam(net.parameters(), lr=0.001)
+	else:
+		optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 	# Load the CIFAR-10
 
