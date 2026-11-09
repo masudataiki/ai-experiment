@@ -103,12 +103,24 @@ python train_mnist_cnn.py -g 0 -o result/cnn
 
 ![CNNの学習曲線](figures/4.2.6_cnn_accuracy.png)
 
-## 演習4.x.x CIFAR-10の学習
+## 演習4.2.7 CIFAR-10の学習
 ```sh
 python train_cifar10.py -g 0 -o result/cifar10 -d data/mini_cifar
 ```
-- 変更点: 
-- 結果: 検証精度 xx% (図のパス)
+- 変更点: dataset.py の `MyCifarDataset` を穴埋め
+  - `classes`: クラス名（フォルダ名）から 0〜9 の番号への辞書
+  - `img_path_list`: `glob` で `cls_dir` の中の png のパスを取得
+  - `cls_label`: `classes[cls]` でクラスの番号を取得
+  - `__getitem__`: `self.all_data[idx]` からパスとラベルを取り出す
+- 設定: デフォルト（epoch 20, batchsize 100）、データは mini_cifar（学習用 1500 枚を学習:検証 = 9:1 に分割）
+- 実行環境: Google Colab GPU（Tesla T4）
+- 結果: 20エポック目の精度（グラフからの読み取り値）
+
+| train | validation |
+|---|---|
+| 約 12% | 約 8% |
+
+![CIFAR-10の学習曲線](figures/4.2.7_cifar_accuracy.png)
 
 ## 演習4.x.x CIFAR-10のテスト
 ```sh
