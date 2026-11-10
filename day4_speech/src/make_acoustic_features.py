@@ -22,7 +22,7 @@ for s in spklist:
         # WORLD analysis for each file
         print("speaker: {} file: {}".format(s,wf))
         fs, data = wavfile.read("data/{}/wav/{}".format(s,wf))
-        data = data.astype(np.float)
+        data = data.astype(float)
 
         f0, t = pw.harvest(data, fs)
         sp = pw.cheaptrick(data, f0, t, fs)
