@@ -10,6 +10,7 @@ class MyCifarDataset(Dataset):
 		mode = 'train' if train else 'test'
 		# TODO class辞書の定義
 		classes = {
+			# 演習4.2.7: クラス名（フォルダ名）を 0〜9 のラベル番号に対応させる辞書。順番は test_cifar10.py の classes と同じ
 			'airplane':0, 'automobile':1, 'bird':2, 'cat':3,
 			   'deer':4, 'dog':5, 'frog':6, 'horse':7, 'ship':8, 'truck':9
 		}
@@ -18,7 +19,9 @@ class MyCifarDataset(Dataset):
 		for cls in classes:
 			cls_dir = os.path.join(self.root, mode, cls)
 
+			# 演習4.2.7: クラスのフォルダ内の png 画像のパスをすべて取得する
 			img_path_list = glob.glob(os.path.join(cls_dir,"*.png"))
+			# 演習4.2.7: フォルダ名から辞書でラベル番号を引く
 			cls_label = classes[cls]
 			cls_data = [[img_path, cls_label] for img_path in img_path_list]
 
@@ -31,8 +34,10 @@ class MyCifarDataset(Dataset):
 	def __getitem__(self, idx):
 		# TODO 画像とラベルの読み取り
 		#self.all_dataを用いる
+		# 演習4.2.7: idx 番目のデータ [画像パス, ラベル] からパスを取り出して画像を開く
 		img = Image.open(self.all_data[idx][0]).convert('RGB')
 		if self.transform is not None:
 			img = self.transform(img)
+		# 演習4.2.7: idx 番目のデータからラベルを取り出す
 		label = self.all_data[idx][1]
 		return [img, label]

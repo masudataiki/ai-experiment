@@ -20,6 +20,7 @@ def main():
 						help='Path to the model for test')
 	parser.add_argument('--dataset', '-d', default='data/mini_cifar',
 						help='Root directory of dataset')
+	# 演習4.2.9（実験C, E）: 学習時と同じネットワークを作るための引数（既定は配布時と同じ）
 	parser.add_argument('--ch1', type=int, default=6,
 						help='Number of output channels of conv1')
 	parser.add_argument('--ch2', type=int, default=16,
@@ -33,6 +34,7 @@ def main():
 	print('')
 
 	# Set up a neural network to test
+	# 演習4.2.9（実験C, E）: 引数で指定したチャンネル数・ドロップアウト率でネットワークを作る
 	net = CifarCNN(10, args.ch1, args.ch2, args.dropout)
 	# Load designated network weight
 	net.load_state_dict(torch.load(args.model))
@@ -49,6 +51,7 @@ def main():
 											 shuffle=False, num_workers=2)
 
 	# Test
+	# 演習4.2.9（実験E）: テストではドロップアウトを無効にするため評価モードにする
 	net.eval()
 	correct = 0
 	total = 0

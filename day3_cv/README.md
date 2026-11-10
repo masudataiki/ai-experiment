@@ -1,7 +1,14 @@
 # Day3 画像認識
 
 ## 環境
-（ここに実行環境）
+| 環境 | 内容 | 使った演習 |
+|---|---|---|
+| Mac（CPU） | MacBook Air（Apple M1）、macOS 15.5、Python 3.12.16、PyTorch 2.9.1、torchvision 0.24.1 | 4.2.2〜4.2.4、コードの動作確認 |
+| Google Colab（GPU） | Tesla T4 | 4.2.1、4.2.5〜4.2.8、4.2.9 の実験0〜C |
+| Azure VM（GPU） | Tesla T4、torch 2.9.1+cu126、torchvision 0.24.1+cu126 | 4.2.9 の実験E と最後のテスト |
+
+- Mac で GPU で学習したモデルを使うときは `-g -1`（CPU）で実行する。
+- 依存パッケージ: リポジトリ直下の `requirements.txt` を参照
 
 <!-- 演習を追加するときはこのブロックをコピーする
 ## 演習4.x.x タイトル
@@ -146,68 +153,159 @@ python test_cifar10.py -g 0 -b 64 -m result/cifar10/model_18 -d data/mini_cifar
 | truck | 0% |
 
 ## 演習4.2.9 CIFAR-10 の精度向上（発展課題）
-```sh
-python train_cifar10.py -g 0 -o result/cifar10_exp0 -d /content/mini_cifar --seed 0 -f 100
-python train_cifar10.py -g 0 -e 100 -o result/cifar10_expA -d /content/mini_cifar --seed 0 -f 200
-python train_cifar10.py -g 0 --optimizer adam -o result/cifar10_expB -d /content/mini_cifar --seed 0 -f 100
-python train_cifar10.py -g 0 -e 100 --optimizer adam -o result/cifar10_expB2 -d /content/mini_cifar --seed 0 -f 200
-python train_cifar10.py -g 0 -e 100 --optimizer adam --augment -o result/cifar10_expF -d /content/mini_cifar --seed 0 -f 200
-python train_cifar10.py -g 0 -e 100 --optimizer adam --augment --ch1 32 --ch2 64 -o result/cifar10_expC -d /content/mini_cifar --seed 0 -f 200
-```
-- 変更点: train_cifar10.py に次の引数と表示を追加
-  - `--seed`（既定は固定しない）とエポックごとの精度表示（学習の動作は変わらない）
-  - `--optimizer`（既定は `sgd` で従来どおり。`adam` で `optim.Adam(net.parameters(), lr=0.001)` に切り替える）
-  - `--augment`（既定はなしで従来どおり。付けると学習データにだけ `RandomHorizontalFlip` と `RandomCrop(32, padding=4)` をかける。検証データは拡張なしのまま）
-  - `--ch1`, `--ch2`（既定は 6, 16 で従来どおり。network.py の `CifarCNN` の conv1, conv2 の出力チャンネル数を変え、全結合層の入力も `ch2 × 5 × 5` に合わせる）
-- 設定: epoch 20（実験A, B2, F, C は 100）, batchsize 100, seed 0, データは mini_cifar（Colab のローカルディスクにコピーして使用）。`-f` は途中のモデルを保存しない指定
-- 実行環境: Google Colab GPU（Tesla T4）
-- 結果: 学習時間は `time` の real
 
-| 実験 | 変えたこと | パラメータ数 | 最終エポックの学習精度 | 検証精度の最大値（何エポック目） | 最後の20エポックの検証精度の平均 | 学習時間 |
-|---|---|---|---|---|---|---|
-| 0 | 変更なし（ベースライン） | 6,882 | 15.11% | 13.33%（2〜4エポック目） | — | 19.8秒 |
-| A | エポック数 20→100 | 6,882 | 38.30% | 46.67%（100エポック目） | — | 1分15.0秒 |
-| B | 最適化手法 SGD→Adam（lr=0.001）※以降はBを基準とする | 6,882 | 44.59% | 42.67%（16エポック目） | — | 19.9秒 |
-| B2 | Bからエポック数 20→100 | 6,882 | 72.89% | 53.33%（84エポック目） | 48.07%（81〜100エポック目） | 1分13.9秒 |
-| F | B2にデータ拡張（左右反転 + RandomCrop(32, padding=4)）を追加 | 6,882 | 48.00% | 58.00%（71, 76エポック目） | 54.47%（81〜100エポック目） | 1分23.7秒 |
-| C | Fからチャンネル数を増やす（conv1 6→32、conv2 16→64） | 69,706 | 65.70% | 56.67%（95エポック目） | 51.23%（81〜100エポック目） | 1分28.7秒 |
+### 1. 目的
+CIFAR-10（mini_cifar）を分類する CNN の精度を上げることを目的とした。学習曲線から精度が低い原因を診断し、その原因に対応する変更を1つずつ加えて効果を確かめた。
 
-実験F は 100エポック目でもまだゆるやかに上がっている（検証精度の平均は 61〜80エポック目 53.70% → 81〜100エポック目 54.47%、loss は 80エポック目 20.957 → 100エポック目 19.839）。
+### 2. 実験の方法（全実験に共通する条件）
+- **データ**: 学習 1,350 枚・検証 150 枚（mini_cifar の学習用 1,500 枚を 9:1 に分割）、テスト 201 枚。
+- **比べ方**: 乱数の種を固定（seed 0）して、学習と検証の分け方を毎回同じにした。1回の実験で変えるのは1か所だけとした。
+- **評価に使った値**: 図3、図4 に見られるように、検証データが 150 枚と少ないため、検証精度はエポックごとに大きく上下する。そのため、1つのエポックの値ではなく、最後の20エポックの検証精度の平均で比べた。
+- **実行環境**: 実験0〜C は Google Colab、実験E と最後のテストは Azure VM で実行した（どちらも Tesla T4）。実験F を Azure VM で再実行したところ、最後の20エポックの検証精度の平均は 52.57% で、Colab の 54.47% と近い値（差 1.90 ポイント）だった。この差は隣り合うエポックの変動より小さいので、環境の違いが精度の比較に与える影響は小さいと判断した。学習時間は環境によって変わるので比べない。
 
-実験0
+### 3. 実験の流れと結果
 
-![実験0の学習曲線](figures/4.2.9_exp0_accuracy.png)
+| 実験 | 変えたこと | パラメータ数 | 最終エポックの学習精度 | 検証精度の最大値（何エポック目） | 最後の20エポックの検証精度の平均 | 学習時間 | 実行環境 |
+|---|---|---|---|---|---|---|---|
+| 0 | 変更なし（ベースライン） | 6,882 | 15.11% | 13.33%（2〜4エポック目） | — | 19.8秒 | Colab（Tesla T4） |
+| A | エポック数 20→100 | 6,882 | 38.30% | 46.67%（100エポック目） | — | 1分15.0秒 | Colab（Tesla T4） |
+| B | 最適化手法 SGD→Adam（lr=0.001）※以降はBを基準とする | 6,882 | 44.59% | 42.67%（16エポック目） | — | 19.9秒 | Colab（Tesla T4） |
+| B2 | Bからエポック数 20→100 | 6,882 | 72.89% | 53.33%（84エポック目） | 48.07%（81〜100エポック目） | 1分13.9秒 | Colab（Tesla T4） |
+| F | B2にデータ拡張（左右反転 + RandomCrop(32, padding=4)）を追加 | 6,882 | 48.00% | 58.00%（71, 76エポック目） | 54.47%（81〜100エポック目） | 1分23.7秒 | Colab（Tesla T4） |
+| C | Fからチャンネル数を増やす（conv1 6→32、conv2 16→64） | 69,706 | 65.70% | 56.67%（95エポック目） | 51.23%（81〜100エポック目） | 1分28.7秒 | Colab（Tesla T4） |
+| E | Cの全結合層の直前にドロップアウト（p=0.5）を追加 | 69,706 | 57.56% | 53.33%（96エポック目） | 49.20%（81〜100エポック目） | 1分3.2秒 | Azure VM（Tesla T4） |
 
-実験A
+※ 学習時間は実行環境によって変わるため、実行環境が異なる実験どうしでは比較しない。
 
-![実験Aの学習曲線](figures/4.2.9_expA_accuracy.png)
+#### 段階1: 学習が進まない（実験0 → A, B）
+ベースラインでは検証精度が 10.67〜13.33% で当てずっぽう（10%）と同程度だった。loss もほとんど下がらなかった。ログに表示される loss は、1エポックの 14 個のミニバッチそれぞれの loss（画像1枚あたりの交差エントロピーの平均。バッチ内の画像の枚数で割った平均なので、バッチの大きさによらない）を足し合わせた値である。モデルが何も学習しておらず、10 クラスすべてに同じ確率 1/10 をつけると、画像1枚あたりの loss は −log(1/10) ≈ 2.30 になり、14 個足すと約 32.2 になる。ベースラインの loss は 1 エポック目 32.250、20 エポック目 32.053 で、この「何も学習していない状態」の値とほぼ同じままだった。学習データが少なく、1エポックの更新回数が 14 回しかないうえ、学習率も小さいためと考えた。エポック数を増やす（A）と、最適化手法を Adam に変える（B）の2つを試した。B は 20 エポックで A の 100 エポックと同程度の精度（検証精度の最大値 B 42.67%、A 46.67%）に達したので、以降は B を基準とした。
 
-実験B
+図1 実験0の学習曲線
 
-![実験Bの学習曲線](figures/4.2.9_expB_accuracy.png)
+![図1 実験0の学習曲線](figures/4.2.9_exp0_accuracy.png)
 
-実験B2
+#### 段階2: 過学習（実験B2 → F）
+B を 100 エポック学習させると（B2）、学習精度は 73% まで上がったが、検証精度は 48% 前後で止まった。過学習と判断し、学習データにだけデータ拡張（左右反転とずらし）をかけた（F）。検証精度の平均は 48.1% → 54.5% に上がった。学習精度は下がったが、変形した画像で測っているためで、想定どおりである。
 
-![実験B2の学習曲線](figures/4.2.9_expB2_accuracy.png)
+図2 実験B2の学習曲線
 
-実験F
+![図2 実験B2の学習曲線](figures/4.2.9_expB2_accuracy.png)
 
-![実験Fの学習曲線](figures/4.2.9_expF_accuracy.png)
+図3 実験Fの学習曲線
 
-実験C
+![図3 実験Fの学習曲線](figures/4.2.9_expF_accuracy.png)
 
-![実験Cの学習曲線](figures/4.2.9_expC_accuracy.png)
+#### 段階3: 表現力を上げる試み（実験C → E）
+F の学習精度 48% は、変形した画像で測っているために低く出ている分もあるが、ネットワークが小さすぎて見分けきれていない（表現力不足の）可能性もある。どちらなのかを確かめるため、チャンネル数を増やした（C、パラメータ約10倍）。C も F と同じく変形した画像で学習精度を測っているので、2つは同じ条件で比べられる。学習精度は 48% から 66% に上がったので、小さいネットワークでは当てはまりきっていなかったと言える。しかし検証精度は上がらず、学習精度が検証精度を約 14 ポイント上回ったので、過学習が戻ったと判断した。そこでドロップアウトを加えた（E）。差は約 8 ポイントに縮んだが、検証精度は F に届かなかった。
 
-## 演習4.3.x 深層特徴データベースの作成
-```sh
-python create_db.py -g 0 -d データセットのパス
-```
-- 変更点: 
-- 結果: 
+図4 実験Cの学習曲線
 
-## 演習4.3.x 深層特徴検索
-```sh
-python search.py -g 0 -i 入力画像のパス -f result/feature.pt -p result/path.pt -k 5
-```
-- 変更点: 
-- 結果: 
+![図4 実験Cの学習曲線](figures/4.2.9_expC_accuracy.png)
+
+図5 実験Eの学習曲線
+
+![図5 実験Eの学習曲線](figures/4.2.9_expE_accuracy.png)
+
+#### 段階4: 最終テスト
+検証精度が一番高かった F を最終モデルとし、Azure VM で再実行した F のうち、検証精度が最大のエポック（86 エポック目）のモデルでテストした。比較のため、ベースライン（実験0）も Azure VM で再実行し、同じ選び方（同点のときは最も後のエポック。演習4.2.8 と同じ）でテストした。テストデータは 201 枚である。
+
+Azure VM での再実行の結果
+
+| 実験 | パラメータ数 | 最終エポックの学習精度 | 検証精度の最大値（何エポック目） | 最後の20エポックの検証精度の平均 | 学習時間 |
+|---|---|---|---|---|---|
+| 0（Azure） | 6,882 | 14.89% | 13.33%（1〜4エポック目） | — | 32.3秒 |
+| F（Azure） | 6,882 | 45.33% | 57.33%（86エポック目） | 52.57%（81〜100エポック目） | 38.6秒 |
+
+| 実験 | 使用モデル | テスト精度 |
+|---|---|---|
+| 0（ベースライン） | `model_4`（検証精度 13.33%） | 10.448% |
+| F（Adam、100エポック、データ拡張） | `model_86`（検証精度 57.33%） | 47.761% |
+
+| クラス | 実験0 | 実験F |
+|---|---|---|
+| airplane | 75% | 65% |
+| automobile | 0% | 55% |
+| bird | 5% | 25% |
+| cat | 0% | 45% |
+| deer | 0% | 25% |
+| dog | 15% | 30% |
+| frog | 0% | 45% |
+| horse | 10% | 70% |
+| ship | 0% | 57% |
+| truck | 0% | 60% |
+
+### 4. 考察
+
+**効いた変更**: 検証精度を最も上げたのはデータ拡張だった（B2 → F で検証精度の平均 48.1% → 54.5%）。B2 では学習精度 73% に対して検証精度 48% と、学習データ 1,350 枚を覚えてしまう過学習が起きていた。データ拡張で学習データの種類を実質的に増やしたことで、これが抑えられたと考えられる。一方、ネットワークを大きくする（C）と学習精度は 48% から 66% に上がったが、検証精度は上がらず、学習精度が検証精度を約 14 ポイント上回る過学習が戻った。これは、モデルを大きくするとバイアス（当てはまりの悪さ）は減るが、分散（学習データへの合わせすぎ）が増えるという、バイアスと分散のトレードオフが現れたものと考えられる。ドロップアウト（E）は学習精度と検証精度の差を約 8 ポイントに縮めたが、検証精度は F に届かなかった。以上のように、ネットワークを大きくして学習データへの当てはまりを良くしても検証精度は上がらず、データ拡張で学習データの種類を増やすと検証精度が上がった。このことから、今回試した範囲では、ネットワークの大きさよりも学習データの少なさのほうが、検証精度を伸び悩ませていたと考えられる。
+
+**テスト精度が検証精度より低い理由**: F のテスト精度（47.8%）は、モデル選択に使った検証精度の最大値（57.3%）より約 10 ポイント低かった。100 エポックの中から検証精度が最大のエポックを選ぶと、偶然よく当たったエポックを選びやすく、その検証精度は高めに出る。実際、最後の20エポックの検証精度の平均は 52.6% で、最大値より低い。テストデータはモデルの選択に使っていないので、テスト精度のほうが実力に近い値と考えられる。
+
+**限界**: 検証データは 150 枚しかなく、1 枚当たるかどうかで精度が 0.67 ポイント動く。そのため、モデルの実力に差がなくても、正解・不正解の境目にある数枚が入れ替わるだけで数ポイント変わりうる。実際、設定も乱数の種も同じ実験 F を Colab と Azure VM で実行すると、検証精度の平均が 1.9 ポイント（約 3 枚分）異なった。F と C の差（約 3 ポイント）もこれと同程度であり、はっきりした差とは言えない。テストデータ（201 枚）も同様である。
+
+### 付録: 実行コマンドとコードの変更点
+
+#### 実行コマンド
+- `-d /content/mini_cifar` は Colab のパス（Drive の `data/mini_cifar` を Colab のローカルディスク `/content` にコピーして使用）。手元（Mac）や Azure VM では、`day3_cv` の中で `-d data/mini_cifar` を使う。
+- 全実験で `--seed 0`。`-f 100`, `-f 200` は途中のモデルを保存しない指定、`-f 1` は毎エポックのモデルを保存する指定。
+
+| 実験 | 変えたこと | 実行環境 | コマンド |
+|---|---|---|---|
+| 0 | 変更なし（ベースライン） | Colab | `python train_cifar10.py -g 0 -o result/cifar10_exp0 -d /content/mini_cifar --seed 0 -f 100` |
+| A | エポック数 20→100 | Colab | `python train_cifar10.py -g 0 -e 100 -o result/cifar10_expA -d /content/mini_cifar --seed 0 -f 200` |
+| B | 最適化手法 SGD→Adam | Colab | `python train_cifar10.py -g 0 --optimizer adam -o result/cifar10_expB -d /content/mini_cifar --seed 0 -f 100` |
+| B2 | Bからエポック数 20→100 | Colab | `python train_cifar10.py -g 0 -e 100 --optimizer adam -o result/cifar10_expB2 -d /content/mini_cifar --seed 0 -f 200` |
+| F | B2にデータ拡張を追加 | Colab | `python train_cifar10.py -g 0 -e 100 --optimizer adam --augment -o result/cifar10_expF -d /content/mini_cifar --seed 0 -f 200` |
+| C | Fからチャンネル数を増やす | Colab | `python train_cifar10.py -g 0 -e 100 --optimizer adam --augment --ch1 32 --ch2 64 -o result/cifar10_expC -d /content/mini_cifar --seed 0 -f 200` |
+| E | Cにドロップアウトを追加 | Azure VM | `python train_cifar10.py -g 0 -e 100 --optimizer adam --augment --ch1 32 --ch2 64 --dropout 0.5 -o result/cifar10_expE -d data/mini_cifar --seed 0 -f 200` |
+| 0（Azure） | 実験0 を再実行（毎エポック保存） | Azure VM | `python train_cifar10.py -g 0 -o result/cifar10_exp0_azure -d data/mini_cifar --seed 0 -f 1` |
+| F（Azure） | 実験F を再実行（毎エポック保存） | Azure VM | `python train_cifar10.py -g 0 -e 100 --optimizer adam --augment -o result/cifar10_expF_azure -d data/mini_cifar --seed 0 -f 1` |
+| テスト 0 | 実験0（Azure）の4エポック目のモデル | Azure VM | `python test_cifar10.py -g 0 -b 64 -m result/cifar10_exp0_azure/model_4 -d data/mini_cifar` |
+| テスト F | 実験F（Azure）の86エポック目のモデル | Azure VM | `python test_cifar10.py -g 0 -b 64 -m result/cifar10_expF_azure/model_86 -d data/mini_cifar` |
+
+- 設定: epoch 20（実験A, B2, F, C, E は 100）, batchsize 100。学習時間は `time` の real。
+- テストの `-b 64` は、テスト 201 枚をバッチサイズ 100 で分けると最後のバッチが1枚になり、`.squeeze()` のため `IndexError` になるのを避けるため（演習4.2.8 と同じ）。
+
+#### コードの変更点
+引数はすべて、指定しなければ配布時と同じ動作になる。
+
+- **`--seed`**（train_cifar10.py の `main()`）: 指定したときだけ `torch.manual_seed` で乱数の種を固定し、cuDNN を決定的な設定にする。あわせて、エポックごとの学習精度と検証精度を表示するようにした。
+- **`--optimizer`**（train_cifar10.py の `main()`）: `adam` のとき `optim.Adam(net.parameters(), lr=0.001)`、それ以外は配布時の `optim.SGD(net.parameters(), lr=0.001, momentum=0.9)`。
+- **`--augment`**（train_cifar10.py の `main()`、`random_split` の直後）: 学習用の番号（`trainset.indices`）だけを、拡張ありの `transform` を持つ複製データセットから取り出す。`valset` は元の拡張なしの `trainvalset` のままなので、検証データには拡張がかからない。
+
+  ```python
+  if args.augment:
+      augmentset = copy.copy(trainvalset)
+      augmentset.transform = transforms.Compose([
+          transforms.RandomHorizontalFlip(),
+          transforms.RandomCrop(32, padding=4),
+          transforms.ToTensor()])
+      trainset = torch.utils.data.Subset(augmentset, trainset.indices)
+  ```
+
+- **`--ch1`, `--ch2`**（network.py の `CifarCNN.__init__` と `CifarCNN.forward`。train_cifar10.py と test_cifar10.py の `main()` で `CifarCNN(10, args.ch1, args.ch2, args.dropout)` として渡す）: conv1, conv2 の出力チャンネル数を変え、全結合層の入力も `ch2 × 5 × 5` に合わせる。
+
+  ```python
+  # CifarCNN.__init__
+  self.ch2 = ch2
+  self.conv1 = nn.Conv2d(3, ch1, 5, stride=1)
+  self.conv2 = nn.Conv2d(ch1, ch2, 5, stride=1)
+  self.fc = nn.Linear(ch2 * 5 * 5, n_out)
+  # CifarCNN.forward
+  h = h.view(-1, self.ch2 * 5 * 5)
+  ```
+
+- **`--dropout`**（network.py の `CifarCNN.__init__` と `CifarCNN.forward`、train_cifar10.py と test_cifar10.py の `main()`）: 全結合層の直前にドロップアウトを入れる。検証とテストの前に `net.eval()` でドロップアウトを無効にし、検証の後に `net.train()` で学習モードに戻す。
+
+  ```python
+  # CifarCNN.__init__
+  self.dropout = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
+  # CifarCNN.forward
+  h = h.view(-1, self.ch2 * 5 * 5)
+  h = self.dropout(h)
+  y = self.fc(h)
+  # train_cifar10.py の main()（検証の前後）
+  net.eval()
+  with torch.no_grad():
+      ...  # 検証
+  net.train()
+  ```

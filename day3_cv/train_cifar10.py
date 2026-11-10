@@ -1,5 +1,6 @@
 
 import argparse
+# 演習4.2.9（実験F）: データ拡張用にデータセットを複製するため
 import copy
 import torch
 import torch.nn as nn
@@ -28,20 +29,26 @@ def main():
 						help='Resume the training from snapshot')
 	parser.add_argument('--dataset', '-d', default='data/mini_cifar',
 						help='Root directory of dataset')
+	# 演習4.2.9: 実験どうしを比べるための乱数の種（既定は固定しない）
 	parser.add_argument('--seed', type=int, default=None,
 						help='Random seed (default: do not fix the seed)')
+	# 演習4.2.9（実験B）: 最適化手法の切り替え（既定は配布時の SGD）
 	parser.add_argument('--optimizer', choices=['sgd', 'adam'], default='sgd',
 						help='Optimizer (sgd: lr=0.001, momentum=0.9 / adam: lr=0.001)')
+	# 演習4.2.9（実験F）: 学習データにだけデータ拡張をかける（既定はなし）
 	parser.add_argument('--augment', action='store_true',
 						help='Apply random flip and crop to the training data only')
+	# 演習4.2.9（実験C）: conv1, conv2 の出力チャンネル数（既定は配布時の 6, 16）
 	parser.add_argument('--ch1', type=int, default=6,
 						help='Number of output channels of conv1')
 	parser.add_argument('--ch2', type=int, default=16,
 						help='Number of output channels of conv2')
+	# 演習4.2.9（実験E）: 全結合層の直前のドロップアウト率（既定の 0 はドロップアウトなし）
 	parser.add_argument('--dropout', type=float, default=0.0,
 						help='Dropout probability before the fully connected layer (0: no dropout)')
 	args = parser.parse_args()
 
+	# 演習4.2.9: --seed を指定したときだけ乱数の種を固定し、GPU の計算も再現できる設定にする
 	# Fix the random seed only when --seed is given
 	if args.seed is not None:
 		torch.manual_seed(args.seed)
@@ -55,6 +62,7 @@ def main():
 	print('')
 
 	# Set up a neural network to train
+	# 演習4.2.9（実験C, E）: 引数で指定したチャンネル数・ドロップアウト率でネットワークを作る
 	net = CifarCNN(10, args.ch1, args.ch2, args.dropout)
 	# Load designated network weight
 	if args.resume:
@@ -67,6 +75,7 @@ def main():
 
 	# Setup a loss and an optimizer
 	criterion = nn.CrossEntropyLoss()
+	# 演習4.2.9（実験B）: --optimizer adam のときは Adam（lr=0.001）、それ以外は配布時の SGD
 	if args.optimizer == 'adam':
 		optimizer = optim.Adam(net.parameters(), lr=0.001)
 	else:
@@ -83,6 +92,7 @@ def main():
 	valsize = n_samples - trainsize
 	trainset, valset = torch.utils.data.random_split(trainvalset, [trainsize, valsize])
 
+	# 演習4.2.9（実験F）: 学習用の番号だけを、拡張ありの transform を持つ複製データセットから取り出す。valset は元の（拡張なしの）trainvalset のまま
 	# Data augmentation for the training data only.
 	# valset keeps using trainvalset, whose transform has no random operation.
 	if args.augment:
@@ -145,6 +155,7 @@ def main():
 			torch.save(net.state_dict(), path)
 
 		# Validation
+		# 演習4.2.9（実験E）: 検証ではドロップアウトを無効にするため評価モードにする
 		net.eval()
 		with torch.no_grad():
 			for data in valloader:
@@ -161,12 +172,14 @@ def main():
 					correct_val += c[i].item()
 					total_val += 1
 
+		# 演習4.2.9（実験E）: 検証が終わったら学習モードに戻す
 		net.train()
 
 		# Record result
 		x.append(ep + 1)
 		ac_train.append(100 * correct_train / total_train)
 		ac_val.append(100 * correct_val / total_val)
+		# 演習4.2.9: エポックごとの学習精度と検証精度を表示する（表の値をログから読むため）
 		print('[epoch %d] accuracy: train %.2f%%, validation %.2f%%' % (ep + 1, ac_train[-1], ac_val[-1]))
 
 	print('Finished Training')

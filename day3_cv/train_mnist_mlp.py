@@ -138,6 +138,7 @@ def main():
 		ac_val.append(100 * correct_val / total_val)
 
 	print('Finished Training')
+	# 演習4.2.5: 最終エポックの精度を数値で表示する（グラフの縦軸 80〜100% の外の値も読めるように）
 	print('Final accuracy: train %.2f%%, validation %.2f%%' % (ac_train[-1], ac_val[-1]))
 	path = args.out + "/model_final"
 	torch.save(net.state_dict(), path)

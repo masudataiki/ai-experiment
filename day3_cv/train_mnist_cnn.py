@@ -32,6 +32,7 @@ def main():
 	print('')
 
 	# Set up a neural network to train
+	# 演習4.2.6: MLP の代わりに実装した MnistCNN を使う
 	#net = MLP(args.unit, 28*28, 10)
 	net = MnistCNN(10)
 
@@ -132,6 +133,7 @@ def main():
 		ac_val.append(100 * correct_val / total_val)
 
 	print('Finished Training')
+	# 演習4.2.6: 最終エポックの精度を数値で表示する
 	print('Final accuracy: train %.2f%%, validation %.2f%%' % (ac_train[-1], ac_val[-1]))
 	path = args.out + "/model_final"
 	torch.save(net.state_dict(), path)

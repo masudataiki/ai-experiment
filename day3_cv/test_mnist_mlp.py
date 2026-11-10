@@ -21,6 +21,7 @@ def main():
 						help='Path to the model for test')
 	parser.add_argument('--unit', '-u', type=int, default=1000,
 						help='Number of units')
+	# 演習4.2.4: 表示する予測の個数（既定の 1 は演習4.2.3 と同じ表示）
 	parser.add_argument('--topk', type=int, default=1,
 						help='Number of predicted labels to print (1: same output as exercise 4.2.3)')
 	args = parser.parse_args()
@@ -31,6 +32,7 @@ def main():
 	# Set up a neural network to test
 	net = MLP(args.unit, 28*28, 10)
 	# Load designated network weight 
+	# 演習4.2.3: GPU で学習したモデルを CPU しかない Mac でも読み込めるようにする
 	net.load_state_dict(torch.load(args.model, map_location='cpu'))
 	# Set model to GPU
 	device = 'cpu'
@@ -54,6 +56,7 @@ def main():
 		# Forward
 		outputs = net(image)
 		# Predict the label
+		# 演習4.2.4: --topk 1 なら従来どおり最大の1個、それ以外は確信度が高い順に上位 topk 個を表示する
 		if args.topk == 1:
 			_, predicted = torch.max(outputs, 1)
 			# Print the result

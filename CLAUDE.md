@@ -29,3 +29,11 @@
 - 結果は Drive の AI_Experiment/results/<day>/ に保存される。README 用には Mac の <day>/result/ にダウンロードして使う。
 
 - Git のブランチは作らず、すべて main で作業・コミット・push する（Colab は main を取得するため）。
+
+# GPU 実行環境（2026-11-10 以降）
+- Colab は GPU 利用上限に達したため、GPU が必要な実行は Azure VM（ssh aiexp）で行う。
+- VM 上の場所: ~/ai-experiment（main を git pull）、venv は ~/venvs/aiexp-cv
+- データは VM の day3_cv/data にコピー済み（Drive は使わない）
+- 実行は tmux の中で、`( time python -u ... ) 2>&1 | tee result/<NAME>/train.log` の形で行い、gpu.txt と packages.txt も残す
+- 結果は Mac から `scp -r aiexp:~/ai-experiment/<day>/result/<NAME> <day>/result/` で取得する
+- 実験を比較するときは、すべて同じ環境で実行する
