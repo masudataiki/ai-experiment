@@ -26,10 +26,10 @@ for i in range(0,len(datalist)):
         src_mgc = src_mgc.reshape(len(src_mgc)//dim, dim)
     
     fs, data = wavfile.read("data/SF/wav/{}.wav".format(datalist[i]))  # 入力音声そのものをもってくる
-    data = data.astype(np.float)
+    data = data.astype(float)
 
     diff_mgc = conv_mgc - src_mgc  # 差分のフィルタを用意する
-    diff_mgc = np.zeros(shape=conv_mgc.shape)
+    #diff_mgc = np.zeros(shape=conv_mgc.shape)
 
     # 差分のフィルタを入力音声波形に適用する
     b = np.apply_along_axis(sptk.mc2b, 1, diff_mgc, alpha)

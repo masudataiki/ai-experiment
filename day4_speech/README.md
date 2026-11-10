@@ -67,3 +67,15 @@ cd day4_speech
 - 変更点: src/convert_both.py を新規作成（convert_f0.py をコピーし、mgc の読み込み元を data/SF/mgc → data/SF-TF/mgc（conversion.py が保存した変換済み mgc）、出力名を {}_both.wav に変更）
 - 出力: result/wav/atr503_a46_both.wav 〜 atr503_a50_both.wav（mgc・F0 は変換後、ap は SF のまま）
 - 結果（聴き比べ）: ②（両方変換）は①（元のSF）より音質が悪く感じた。声の高さも声色も少し変わった気がするが、③（TF）に近づいた感じはしなかった
+
+## 演習5.4.3 差分スペクトル法
+```sh
+cd day4_speech
+../.venv/bin/python -u src/convert_differential.py
+```
+- 実行環境: Mac (arm64, CPU)。前提として演習5.4.1 の欄のコマンド（conversion.py まで）を実行済み
+- 変更点: src/convert_differential.py
+  - 29行目 `np.float` → `float`（NumPy 2 対応）
+  - 32行目 `diff_mgc = np.zeros(...)` をコメントアウト（31行目の差分 conv_mgc − src_mgc が 0 で上書きされ、無変換になっていたため）
+- 出力: result/wav/atr503_a46_diff.wav 〜 atr503_a50_diff.wav（SF の入力音声に差分フィルタを適用。F0 は SF のまま）
+- 結果（聴き比べ）: ②（差分スペクトル法）は声の高さは①（元のSF）のまま。声色は①とも③（TF）ともどちらとも言えない微妙な感じ。音質は5.4.2（両方変換）より向上したと感じた
