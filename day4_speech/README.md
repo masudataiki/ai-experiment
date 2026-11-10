@@ -20,6 +20,8 @@
 -->
 
 ## 前提の手順（5.4.4〜5.4.7：特徴量の分析 → 時間アラインメント → 学習 → 変換）
+- 実行前の準備: 配布フォルダの `data/`（SF と TF の wav）を `day4_speech/data/` に置く。
+
 ```sh
 cd day4_speech
 ../.venv/bin/python -u src/make_acoustic_features.py   # 5.4.4 WORLD で mgc / f0 / ap を抽出
@@ -27,6 +29,7 @@ cd day4_speech
 ../.venv/bin/python -u src/train.py -g -1              # 5.4.6 VCDNN を 50 エポック学習（CPU）
 ../.venv/bin/python -u src/conversion.py               # 5.4.7 評価用5文の mgc を変換して合成
 ```
+- 設定: エポック数 50。実験書のコードは `n_epoch = 5` だが、配布された `src/train.py` の `main()` は最初から `--epochs` の既定値が 50（ノートブックも `n_epoch = 50`）で、変更していない
 - 実行環境: Mac（CPU）。演習5.4.1 の `convert_f0.py` まで続けて実行し、合計 5分16.6秒（`time` の total）。ログは `result/f0/run.log`
 - 変更点: `src/make_acoustic_features.py` の、wav ごとに WORLD 分析をするループの中。NumPy 2 で `np.float` が削除されて動かないため、`float` に変えた（ノートブックと同じ書き方）。
   ```python
