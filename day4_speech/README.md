@@ -79,3 +79,13 @@ cd day4_speech
   - 32行目 `diff_mgc = np.zeros(...)` をコメントアウト（31行目の差分 conv_mgc − src_mgc が 0 で上書きされ、無変換になっていたため）
 - 出力: result/wav/atr503_a46_diff.wav 〜 atr503_a50_diff.wav（SF の入力音声に差分フィルタを適用。F0 は SF のまま）
 - 結果（聴き比べ）: ②（差分スペクトル法）は声の高さは①（元のSF）のまま。声色は①とも③（TF）ともどちらとも言えない微妙な感じ。音質は5.4.2（両方変換）より向上したと感じた
+
+## 演習5.4.4 F0 変換音声への差分フィルタの適用
+```sh
+cd day4_speech
+../.venv/bin/python -u src/convert_differential_f0.py
+```
+- 実行環境: Mac (arm64, CPU)。前提として演習5.4.1（convert_f0.py）と演習5.4.3 を実行済み
+- 変更点: src/convert_differential_f0.py を新規作成（convert_differential.py をコピーし、差分フィルタをかける入力音声を data/SF/wav/{}.wav → result/wav/{}_f0.wav（5.4.1 の F0 のみ変換した音声）、出力名を {}_diff_f0.wav に変更）
+- 出力: result/wav/atr503_a46_diff_f0.wav 〜 atr503_a50_diff_f0.wav
+- 結果（聴き比べ）: ②（F0変換＋差分フィルタ）は声の高さが③（TF）に近く、5.4.3 の _diff.wav より③に近くなった。音質は耳を澄ますと粗があるように聞こえる。声色は5.4.3と同様に①（元のSF）とも③とも言えない微妙な感じ
