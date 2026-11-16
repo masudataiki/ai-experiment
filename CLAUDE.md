@@ -37,3 +37,9 @@
 - 実行は tmux の中で、`( time python -u ... ) 2>&1 | tee result/<NAME>/train.log` の形で行い、gpu.txt と packages.txt も残す
 - 結果は Mac から `scp -r aiexp:~/ai-experiment/<day>/result/<NAME> <day>/result/` で取得する
 - 実験を比較するときは、すべて同じ環境で実行する
+
+# 自由課題（free_task/）
+- 計画は free_task/PLAN.md に書いてある。作業の前に必ず読むこと。PLAN.md にないことを勝手に決めず、必要なら私に確認する。
+- day3_cv のコードはコピーして使い、day3_cv 自体は変更しない。
+- データ（CIFAR-10、CIFAR-10-C）は free_task/data/ に置き、Git には入れない。取得手順は free_task/download_data.sh にまとめる。
+- 学習は Azure VM で行う（実行方法は上の「GPU 実行環境」の節のとおり）。Mac では小さい設定で動作確認だけする。
