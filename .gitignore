@@ -8,8 +8,9 @@ __pycache__/
 dataset/
 docs/
 bundles/
-bundles/
-bundles/
-bundles/
-bundles/
 free_task/data/
+
+# 作業用のエディタ・AI ツールの設定（提出物には含めない）
+.vscode/
+.claude/
+CLAUDE.md
