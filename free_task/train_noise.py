@@ -65,6 +65,7 @@ def save_curve(log, path):
 
 
 def main():
+	"""引数を読み、CIFAR-10 を 45,000 / 5,000 に分けて CifarCNN を学習する。毎エポック、ログ・モデル・学習曲線を保存する"""
 	parser = argparse.ArgumentParser(description='CIFAR-10 with Gaussian noise augmentation')
 	parser.add_argument('--noise-sigma', type=float, default=0.0,
 						help='Max std of the Gaussian noise (0: no noise). s ~ U(0, sigma) per batch')

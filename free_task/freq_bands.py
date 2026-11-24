@@ -78,6 +78,7 @@ def sigma_of(folder):
 
 
 def count_correct(net, x, y, device):
+	"""1 バッチ（x: 画像, y: 正解ラベル）のうち、正しく分類できた枚数"""
 	with torch.no_grad():
 		return (net(x.to(device)).argmax(1) == y.to(device)).sum().item()
 
@@ -131,6 +132,7 @@ def plot_examples(image, eps, seed, path, bands=(1, 5, 9)):
 
 
 def main():
+	"""各モデルについて、元画像と 9 帯 × ε の邪魔を足した画像の誤り率を測り、CSV 5 つと図 2 枚を保存する"""
 	parser = argparse.ArgumentParser(description='Sensitivity to perturbations in each frequency band')
 	parser.add_argument('--models', nargs='+', default=None,
 						help='Result folders (default: all result/noise_sNNN with best_epoch.txt)')

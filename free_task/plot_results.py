@@ -70,6 +70,7 @@ def load(in_dir):
 
 
 def label(sigma):
+	"""図に書くモデル名（例: σ = 0.05 -> 'M1 (σ=0.05)'）"""
 	mid = MODEL_ID.get(sigma)
 	return '{} (σ={:g})'.format(mid, sigma) if mid else 'σ={:g}'.format(sigma)
 
@@ -162,6 +163,7 @@ def plot_severity_lines(results, path):
 
 
 def main():
+	"""result/ の評価 CSV を読み、ヒートマップ・σ との折れ線・強さごとの折れ線の 3 枚を保存する"""
 	parser = argparse.ArgumentParser(description='Plot figures from eval CSVs')
 	parser.add_argument('--in-dir', default='result', help='Directory of eval_noise_sNNN.csv')
 	parser.add_argument('--out-dir', default='result/figures', help='Directory to save figures')

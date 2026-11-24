@@ -18,6 +18,7 @@ from eval_cifar10c import CORRUPTIONS
 
 
 def main():
+	"""CIFAR-10 テスト画像を 5 回並べた偽の CIFAR-10-C（5 種類 + labels.npy）を保存する"""
 	parser = argparse.ArgumentParser(description='Make fake CIFAR-10-C files from the CIFAR-10 test set')
 	parser.add_argument('--dataset', '-d', default='data',
 						help='Root directory of CIFAR-10 (torchvision format)')

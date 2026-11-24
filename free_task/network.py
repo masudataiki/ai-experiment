@@ -1,10 +1,17 @@
+"""
+ネットワークの定義（day3_cv/network.py のコピー。変更していない）
 
+自由課題では CifarCNN だけを使う（ch1=32, ch2=64, dropout=0。PLAN.md 3 節）。
+MLP と MnistCNN は day3 の MNIST 用で、自由課題では使わない。
+"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 class  MLP(nn.Module):
 	"""
+	全結合 3 層のネットワーク（day3 の MNIST 用。自由課題では使わない）
+
 	Network / Multilayer perseptron
 
 	"""
@@ -50,6 +57,8 @@ class  MLP(nn.Module):
 
 class  MnistCNN(nn.Module):
 	"""
+	MNIST 用の畳み込みネットワーク（day3 用。自由課題では使わない）
+
 	Network / Convolutional newral network for Mnist task
 	"""
 	def __init__(self, n_out):
@@ -92,6 +101,8 @@ class  MnistCNN(nn.Module):
 
 class   CifarCNN(nn.Module):
 	"""
+	CIFAR-10 用の畳み込みネットワーク: 畳み込み 5×5 → ReLU → 最大値プーリングを 2 回、最後に全結合層で 10 クラスの得点を出す
+
 	Network / Convolutional newral network for Cifar10 task
 	"""
 	# 演習4.2.9（実験C, E）: ch1, ch2 でチャンネル数、dropout でドロップアウト率を指定できるようにした。既定値では配布時と同じネットワーク

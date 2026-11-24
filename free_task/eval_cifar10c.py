@@ -55,6 +55,7 @@ def resolve_model(path):
 
 
 def main():
+	"""引数で指定したモデル 1 つを、元画像と CIFAR-10-C 5 種類 × 強さ 1〜5 で評価し、誤り率を CSV に保存する"""
 	parser = argparse.ArgumentParser(description='Evaluate a model on CIFAR-10 and CIFAR-10-C')
 	parser.add_argument('--model', '-m', required=True,
 						help='Model file, or a result folder (uses best_epoch.txt)')

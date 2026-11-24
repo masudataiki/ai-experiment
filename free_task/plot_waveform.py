@@ -31,6 +31,7 @@ def to_gray(img):
 
 
 def main():
+	"""テスト画像 1 枚と CIFAR-10-C 4 種類の画像を並べ、真ん中の横 1 行の明るさの図を保存する"""
 	parser = argparse.ArgumentParser(description='Plot one row of pixels for clean and corrupted images')
 	parser.add_argument('--index', '-i', type=int, default=0, help='Index of the CIFAR-10 test image (0-9999)')
 	parser.add_argument('--severity', '-s', type=int, default=3, help='Severity of CIFAR-10-C (1-5)')
